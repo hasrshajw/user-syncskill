@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logging out...</title>
+    <style>
+        body { background: #fff; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- Include Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function handleLogout() {
+            // 1. Clear Supabase Session
+            await supabaseClient.auth.signOut();
+            
+            // 2. Clear local storage (active_course_id, etc.)
+            localStorage.clear();
+            
+            // 3. Redirect to login page
+            window.location.href = 'index.html';
+        }
+
+        // Execute immediately on page load
+        handleLogout();
+    </script>
+</body>
+</html>
