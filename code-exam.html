@@ -10,116 +10,100 @@
         :root {
             --bg-dark: #0d1117; --surface-dark: #161b22; --border-color: #30363d;
             --text-primary: #c9d1d9; --text-secondary: #8b949e; --brand-purple: #6D28D9;
-            --success: #238636; --danger: #da3633; --warning: #f1e05a;
+            --success: #238636; --danger: #da3633;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg-dark); color: var(--text-primary); height: 100vh; overflow: hidden; }
 
-        /* IDE Layout */
-        .ide-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        /* Layout */
+        .ide-container { display: flex; height: 100vh; flex-direction: column; }
         .ide-header { height: 60px; background: var(--surface-dark); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; }
-        .main-layout { display: grid; grid-template-columns: 350px 1fr 300px; flex: 1; overflow: hidden; }
+        .main-layout { display: grid; grid-template-columns: 350px 1fr 350px; flex: 1; overflow: hidden; }
 
-        /* Panels */
-        .panel { background: var(--surface-dark); border-right: 1px solid var(--border-color); overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; }
-        .problem-info h2 { color: #fff; margin-bottom: 1rem; font-size: 1.2rem; }
-        .problem-info p { line-height: 1.6; color: var(--text-secondary); margin-bottom: 1rem; }
-        .test-case-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-top: 10px; font-family: 'Fira Code', monospace; font-size: 0.8rem; border: 1px solid var(--border-color); white-space: pre-wrap; }
+        /* Sidebar Panels */
+        .panel { background: var(--surface-dark); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; padding: 1.5rem; }
+        .problem-statement h2 { font-size: 1.25rem; margin-bottom: 1rem; color: #fff; }
+        .problem-statement p { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+        
+        .test-case-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-top: 10px; font-family: 'Fira Code', monospace; font-size: 0.8rem; }
 
         /* Editor */
-        #editor-container { flex: 1; background: #000; }
+        #editor-target { flex: 1; background: #000; }
 
-        /* Right Panel: Navigator & Results */
+        /* Right Sidebar: Results & Navigation */
         .right-panel { border-left: 1px solid var(--border-color); border-right: none; }
-        .nav-item { padding: 12px; border-radius: 8px; background: #21262d; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; font-weight: 600; }
-        .nav-item:hover { border-color: var(--brand-purple); }
-        .nav-item.active { background: var(--brand-purple); color: white; }
-        .nav-item.submitted { opacity: 0.6; cursor: default; border-color: var(--success); }
-
-        /* Result View (MCQ Style Score Card) */
-        #result-view { position: fixed; inset: 0; background: var(--bg-dark); z-index: 1000; display: none; align-items: center; justify-content: center; }
-        .result-card { background: var(--surface-dark); padding: 4rem 2rem; border-radius: 24px; text-align: center; max-width: 450px; width: 90%; border: 1px solid var(--border-color); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        .score-big { font-size: 5rem; font-weight: 800; color: var(--brand-purple); margin: 1rem 0; }
-
-        /* Buttons */
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
         .btn-run { background: #30363d; color: white; }
         .btn-submit { background: var(--brand-purple); color: white; }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .timer { font-family: 'Fira Code', monospace; font-weight: 700; color: var(--danger); background: rgba(218, 54, 51, 0.1); padding: 5px 12px; border-radius: 6px; }
         
-        #loading-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9998; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+        .status-pill { padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .status-pass { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
+        .status-fail { background: rgba(218, 54, 51, 0.2); color: #f85149; }
+
+        .timer-box { font-family: 'Fira Code', monospace; color: var(--danger); background: rgba(218, 54, 51, 0.1); padding: 5px 12px; border-radius: 6px; font-weight: 700; }
+
+        /* Proctoring Overlay */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+        
+        #loading-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 10000; display: flex; align-items: center; justify-content: center; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">Booting ProCoder Environment...</div>
+    <div id="loading-overlay">Initializing IDE Environment...</div>
 
-    <!-- Fullscreen Proctoring -->
-    <div id="proctor-overlay" class="overlay">
+    <!-- Proctoring: Fullscreen Requirement -->
+    <div id="proctor-overlay" class="overlay" style="display: none;">
         <i class='bx bx-fullscreen' style="font-size: 4rem; color: var(--brand-purple);"></i>
-        <h2 style="margin: 1.5rem 0;">Fullscreen Required</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 2rem;">To protect exam integrity, you must be in Fullscreen Mode.</p>
+        <h2 style="margin: 1rem 0;">Fullscreen Required</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">To prevent cheating, this exam must be taken in Fullscreen Mode.</p>
         <button class="btn btn-submit" onclick="enterFullscreen()">Enter Fullscreen & Resume</button>
     </div>
 
-    <!-- Final Result Score Card -->
-    <div id="result-view">
-        <div class="result-card">
-            <i class='bx bxs-check-shield' style="font-size: 5rem; color: var(--success);"></i>
-            <h2 id="result-title">Assignment Complete</h2>
-            <div class="score-big" id="final-score-display">0 / 0</div>
-            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Assessment points have been synced to your profile.</p>
-            <button class="btn btn-submit" style="width: 100%; justify-content: center;" onclick="window.location.href='student-dashboard.html'">Back to Dashboard</button>
-        </div>
-    </div>
-
-    <div class="ide-wrapper">
+    <div class="ide-container">
         <header class="ide-header">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <img src="https://ihtnas.com/assets/ihtnas-nav.png" alt="Logo" style="height: 25px;">
-                <span id="assign-name" style="font-weight: 700; font-size: 0.9rem;">Assessment IDE</span>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="https://ihtnas.com/assets/ihtnas-nav.png" alt="Logo" style="height: 24px;">
+                <span id="assignment-name" style="font-weight: 700;">Code Assessment</span>
             </div>
             
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div class="timer" id="timer">00:00</div>
-                <button class="btn btn-run" onclick="runCode()"><i class='bx bx-play'></i> Run Sample</button>
-                <button class="btn btn-submit" id="submit-btn" onclick="submitCurrentProblem()"><i class='bx bx-cloud-upload'></i> Submit Problem</button>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="timer-box" id="timer">00:00</div>
+                <button class="btn btn-run" onclick="runCode()"><i class='bx bx-play'></i> Run Code</button>
+                <button class="btn btn-submit" onclick="submitProblem()"><i class='bx bx-cloud-upload'></i> Submit Problem</button>
             </div>
         </header>
 
         <main class="main-layout">
-            <!-- Problem Description -->
-            <div class="panel problem-info">
-                <h2 id="p-title">Loading Task...</h2>
-                <div id="p-statement">Please wait for the environment to sync.</div>
-                <h4 style="margin-top: 2rem; font-size: 0.75rem; color: var(--warning); letter-spacing: 1px;">SAMPLE TEST CASE</h4>
-                <div id="p-example" class="test-case-box">--</div>
+            <!-- Left: Problem Description -->
+            <div class="panel problem-statement">
+                <h2 id="p-title">Select a Problem</h2>
+                <div id="p-statement"></div>
+                <h3 style="margin-top: 2rem; font-size: 0.9rem;">Example Test Case:</h3>
+                <div id="p-example" class="test-case-box"></div>
                 
                 <div style="margin-top: auto; padding-top: 2rem;">
-                    <button class="btn btn-run" style="width: 100%; border: 1px solid var(--danger); color: var(--danger); justify-content: center;" onclick="endAssignment()">Finish & Exit Exam</button>
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="endExam()">Finish Exam</button>
                 </div>
             </div>
 
-            <!-- Monaco Editor Container -->
-            <div id="editor-container"></div>
+            <!-- Center: Code Editor -->
+            <div id="editor-target"></div>
 
-            <!-- Side Nav & Results -->
+            <!-- Right: Results & Selector -->
             <div class="panel right-panel">
-                <h3 style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 1rem; letter-spacing: 1.5px;">TASKS</h3>
-                <div id="problem-nav-list"></div>
+                <h3 style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 1rem;">Problems</h3>
+                <div id="problem-nav-list" style="display: grid; gap: 8px; margin-bottom: 2rem;"></div>
 
-                <h3 style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 2.5rem; margin-bottom: 1rem; letter-spacing: 1.5px;">EXECUTION LOG</h3>
-                <div id="results-log" style="font-size: 0.85rem;">
-                    <p style="color: #555; font-style: italic;">Results will appear here.</p>
+                <h3 style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 1rem;">Test Results</h3>
+                <div id="results-log">
+                    <p style="color: #666; font-style: italic;">Run code to see results...</p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Scripts -->
+    <!-- Monaco Editor & Pyodide -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -129,10 +113,11 @@
         const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const assignmentId = new URLSearchParams(window.location.search).get('id');
-        let currentUser, assignment, problems = [], activeProblem = null;
-        let editor, pyodide, timer;
-        let submittedProblemIds = new Set();
+        const params = new URLSearchParams(window.location.search);
+        const assignmentId = params.get('id');
+
+        let currentUser, assignmentData, problems = [], activeProblem = null;
+        let editor, pyodide, timerInterval;
         let violationCount = 0;
 
         async function init() {
@@ -140,118 +125,129 @@
             if (!session || !assignmentId) { window.location.href = 'student-dashboard.html'; return; }
             currentUser = session.user;
 
-            // 1. Fetch Existing Submissions for THIS assignment
-            const { data: existing } = await supabaseClient
-                .from('code_submissions')
-                .select('problem_id, score')
-                .eq('user_id', currentUser.id)
-                .eq('assignment_id', assignmentId);
-
-            // 2. Fetch Assignment and Problem Data
+            // Load Data
             const [assignRes, probRes] = await Promise.all([
                 supabaseClient.from('code_assignments').select('*').eq('id', assignmentId).single(),
                 supabaseClient.from('code_problems').select('*').eq('assignment_id', assignmentId).order('id', {ascending: true})
             ]);
 
-            if (assignRes.error || !probRes.data) { window.location.href = 'student-dashboard.html'; return; }
-            assignment = assignRes.data;
+            assignmentData = assignRes.data;
             problems = probRes.data;
 
-            // 3. Score Card Guard: If all problems are submitted, show results immediately
-            if (existing && existing.length >= problems.length && problems.length > 0) {
-                const earned = existing.reduce((a, b) => a + (b.score || 0), 0);
-                const total = problems.reduce((a, b) => a + b.points, 0);
-                showFinalScore(earned, total);
-                document.getElementById('loading-overlay').style.display = 'none';
-                return;
+            if (!assignmentData || problems.length === 0) { alert("Assignment Error"); return; }
+
+            document.getElementById('assignment-name').innerText = assignmentData.name;
+            
+            await initEditor();
+            if (problems.some(p => p.language === 'python')) {
+                pyodide = await loadPyodide();
             }
 
-            // Sync submitted problem state
-            existing?.forEach(s => submittedProblemIds.add(s.problem_id));
-
-            await bootIDE();
-            renderNav();
-            
-            // Auto-load first unsubmitted task
-            const next = problems.find(p => !submittedProblemIds.has(p.id)) || problems[0];
-            loadTask(next.id);
-            
-            startTimer(assignment.duration);
+            renderProblemList();
+            switchProblem(problems[0].id);
+            startTimer(assignmentData.duration);
             setupProctoring();
 
-            document.getElementById('assign-name').innerText = assignment.name;
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        async function bootIDE() {
-            await new Promise(resolve => {
+        function initEditor() {
+            return new Promise(resolve => {
                 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
-                require(['vs/editor/editor.main'], () => {
-                    editor = monaco.editor.create(document.getElementById('editor-container'), {
-                        theme: 'vs-dark', fontSize: 16, fontFamily: 'Fira Code', automaticLayout: true, minimap: { enabled: false }
+                require(['vs/editor/editor.main'], function() {
+                    editor = monaco.editor.create(document.getElementById('editor-target'), {
+                        value: "",
+                        language: 'javascript',
+                        theme: 'vs-dark',
+                        fontSize: 16,
+                        fontFamily: 'Fira Code',
+                        automaticLayout: true,
+                        minimap: { enabled: false }
                     });
                     resolve();
                 });
             });
-            if (problems.some(p => p.language === 'python')) pyodide = await loadPyodide();
         }
 
-        function renderNav() {
-            const list = document.getElementById('problem-nav-list');
-            list.innerHTML = problems.map((p, i) => `
-                <div class="nav-item ${p.id === activeProblem?.id ? 'active' : ''} ${submittedProblemIds.has(p.id) ? 'submitted' : ''}" 
-                     onclick="loadTask('${p.id}')">
-                    <span>Task ${i + 1}</span>
-                    ${submittedProblemIds.has(p.id) ? "<i class='bx bxs-check-circle' style='color:var(--success)'></i>" : "<i class='bx bx-code'></i>"}
+        function renderProblemList() {
+            const nav = document.getElementById('problem-nav-list');
+            nav.innerHTML = problems.map((p, idx) => `
+                <div class="btn btn-run" style="justify-content: flex-start;" onclick="switchProblem('${p.id}')">
+                    <span style="opacity: 0.5;">${idx + 1}.</span> ${p.title}
                 </div>
             `).join('');
         }
 
-        function loadTask(id) {
-            if (activeProblem?.id === id) return;
+        function switchProblem(id) {
             activeProblem = problems.find(p => p.id === id);
-            
             document.getElementById('p-title').innerText = activeProblem.title;
             document.getElementById('p-statement').innerHTML = activeProblem.statement;
             
-            const tc = activeProblem.test_cases?.[0];
-            document.getElementById('p-example').innerText = tc ? `Input: ${tc.input}\nOutput: ${tc.output}` : "N/A";
+            const example = activeProblem.test_cases?.[0];
+            document.getElementById('p-example').innerText = example ? `Input: ${example.input}\nOutput: ${example.output}` : "No examples.";
 
-            const lang = activeProblem.language === 'python' ? 'python' : 'javascript';
-            monaco.editor.setModelLanguage(editor.getModel(), lang);
+            // Update Editor Language
+            const langMap = { 'python': 'python', 'javascript': 'javascript', 'java': 'java', 'c': 'c', 'html': 'html' };
+            monaco.editor.setModelLanguage(editor.getModel(), langMap[activeProblem.language] || 'javascript');
             editor.setValue(activeProblem.starter_code);
-            
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = submittedProblemIds.has(id);
-            btn.innerHTML = btn.disabled ? "Locked (Submitted)" : "<i class='bx bx-cloud-upload'></i> Submit Problem";
-
-            renderNav();
         }
 
         async function runCode() {
-            const log = document.getElementById('results-log');
-            log.innerHTML = "<p style='color:var(--warning)'>Testing sample case...</p>";
-            const results = await processTests(activeProblem.test_cases.slice(0, 1));
-            const r = results[0];
-            log.innerHTML = `
-                <div style="padding:10px; border-radius:8px; border:1px solid ${r.passed ? 'var(--success)' : 'var(--danger)'}">
-                    <p><strong>Sample Result:</strong> ${r.passed ? 'PASS' : 'FAIL'}</p>
-                    <div style="font-size:0.75rem; margin-top:5px; opacity:0.8">Expected: ${r.expected} <br> Received: ${r.actual}</div>
-                </div>`;
+            const code = editor.getValue();
+            const resultsTarget = document.getElementById('results-log');
+            resultsTarget.innerHTML = "Running local test cases...";
+
+            // Use only the first 2 test cases for "Run" (Public tests)
+            const publicTests = activeProblem.test_cases.slice(0, 2);
+            const results = await executeCode(code, publicTests);
+            
+            renderResults(results);
         }
 
-        async function submitCurrentProblem() {
-            if (!confirm("Final Submission? You cannot edit this task again.")) return;
-            
-            document.getElementById('loading-overlay').style.display = 'flex';
-            document.getElementById('loading-overlay').innerText = "Processing Test Suite...";
+        async function executeCode(code, testCases) {
+            let results = [];
+            for (let tc of testCases) {
+                let passed = false;
+                let actual = "";
+                try {
+                    if (activeProblem.language === 'javascript') {
+                        const fn = new Function('input', code + `\n return ${activeProblem.function_name}(input);`);
+                        actual = fn(JSON.parse(tc.input));
+                        passed = JSON.stringify(actual) == JSON.stringify(JSON.parse(tc.output));
+                    } 
+                    else if (activeProblem.language === 'python') {
+                        await pyodide.runPythonAsync(`input_val = ${tc.input}\n${code}\nresult = ${activeProblem.function_name}(input_val)`);
+                        actual = pyodide.globals.get('result');
+                        passed = actual.toString() == tc.output.toString();
+                    }
+                    results.push({ input: tc.input, expected: tc.output, actual, passed });
+                } catch (e) {
+                    results.push({ input: tc.input, expected: tc.output, actual: e.message, passed: false });
+                }
+            }
+            return results;
+        }
 
-            const code = editor.getValue();
-            const tests = await processTests(activeProblem.test_cases);
-            const passed = tests.filter(t => t.passed).length;
+        function renderResults(results) {
+            const target = document.getElementById('results-log');
+            target.innerHTML = results.map((r, i) => `
+                <div style="margin-bottom: 10px; font-size: 0.85rem;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>Test #${i+1}</strong>
+                        <span class="status-pill ${r.passed ? 'status-pass' : 'status-fail'}">${r.passed ? 'Passed' : 'Failed'}</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.75rem;">Expected: ${r.expected} | Got: ${r.actual}</div>
+                </div>
+            `).join('');
+        }
+
+        async function submitProblem() {
+            if(!confirm("Submit this problem? You can only submit once per problem.")) return;
             
-            // Logic: Score is calculated proportionally. If 0 passed, score is 0.
-            const earned = passed > 0 ? Math.round((passed / tests.length) * activeProblem.points) : 0;
+            const code = editor.getValue();
+            const results = await executeCode(code, activeProblem.test_cases); // Run ALL tests
+            const passedCount = results.filter(r => r.passed).length;
+            const finalScore = Math.round((passedCount / results.length) * activeProblem.points);
 
             const { error } = await supabaseClient
                 .from('code_submissions')
@@ -259,65 +255,44 @@
                     user_id: currentUser.id,
                     assignment_id: assignmentId,
                     problem_id: activeProblem.id,
-                    score: earned,
+                    score: finalScore,
                     code_body: code,
-                    passed_cases: passed,
-                    total_cases: tests.length
+                    passed_cases: passedCount,
+                    total_cases: results.length
                 }]);
 
-            document.getElementById('loading-overlay').style.display = 'none';
-
             if (!error) {
-                submittedProblemIds.add(activeProblem.id);
-                alert(`Task graded: ${earned} / ${activeProblem.points}`);
-                
-                const nextTask = problems.find(p => !submittedProblemIds.has(p.id));
-                if (nextTask) loadTask(nextTask.id);
-                else endAssignment();
+                alert(`Submitted! You earned ${finalScore} points.`);
+            } else {
+                alert("Submission failed: " + error.message);
             }
         }
 
-        async function processTests(cases) {
-            const code = editor.getValue();
-            const results = [];
-            for (let tc of cases) {
-                let passed = false, actual = "";
-                try {
-                    if (activeProblem.language === 'python') {
-                        await pyodide.runPythonAsync(`input_val = ${tc.input}\n${code}\nresult = ${activeProblem.function_name}(input_val)`);
-                        actual = pyodide.globals.get('result').toString();
-                        passed = actual == tc.output.toString();
-                    } else {
-                        const fn = new Function('input', code + `\n return ${activeProblem.function_name}(input);`);
-                        actual = fn(JSON.parse(tc.input));
-                        passed = JSON.stringify(actual) == JSON.stringify(JSON.parse(tc.output));
-                    }
-                } catch (e) { actual = "Error: " + e.message; }
-                results.push({ input: tc.input, expected: tc.output, actual, passed });
-            }
-            return results;
-        }
-
-        function startTimer(duration) {
-            let seconds = duration;
-            timer = setInterval(() => {
-                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-                const s = (seconds % 60).toString().padStart(2, '0');
+        function startTimer(seconds) {
+            let time = seconds;
+            timerInterval = setInterval(() => {
+                const m = Math.floor(time / 60).toString().padStart(2, '0');
+                const s = (time % 60).toString().padStart(2, '0');
                 document.getElementById('timer').innerText = `${m}:${s}`;
-                if (seconds <= 0) { clearInterval(timer); endAssignment(); }
-                seconds--;
+                if (time <= 0) { clearInterval(timerInterval); endExam(); }
+                time--;
             }, 1000);
         }
 
         function setupProctoring() {
+            // 1. Tab Switching Detection
             document.addEventListener("visibilitychange", () => {
                 if (document.hidden) {
                     violationCount++;
-                    alert(`Security Warning (${violationCount}/3): You must not leave this tab!`);
+                    alert(`Proctoring Warning (${violationCount}): Tab switching is not allowed!`);
                 }
             });
+
+            // 2. Fullscreen Enforcement
             window.addEventListener('resize', () => {
-                if (!window.screenTop && !window.screenY) document.getElementById('proctor-overlay').style.display = 'flex';
+                if (!window.screenTop && !window.screenY) {
+                    document.getElementById('proctor-overlay').style.display = 'flex';
+                }
             });
         }
 
@@ -326,57 +301,10 @@
             document.getElementById('proctor-overlay').style.display = 'none';
         }
 
-async function endAssignment() {
-    // 1. Check for unsaved/unsubmitted work in the current editor
-    if (activeProblem && !submittedProblemIds.has(activeProblem.id)) {
-        const currentCode = editor.getValue().trim();
-        const starterCode = activeProblem.starter_code.trim();
-
-        // Warning logic: If the editor isn't empty AND it's different from the original template
-        if (currentCode !== "" && currentCode !== starterCode) {
-            const confirmExit = confirm(
-                "ATTENTION: You have unsubmitted code in your editor for '" + activeProblem.title + "'.\n\n" +
-                "If you finish now, this task will receive 0 points. " +
-                "Would you like to SUBMIT this problem before finishing?"
-            );
-            
-            if (confirmExit) {
-                // Option A: Stop them so they can click the purple Submit button manually
-                return; 
-            }
-            // If they click 'Cancel' on the confirm, it means they genuinely want to throw away the work.
-        }
-    }
-
-    // 2. Proceed to stop the timer and calculate final results
-    clearInterval(timer);
-    
-    document.getElementById('loading-overlay').style.display = 'flex';
-    document.getElementById('loading-overlay').innerText = "Finalizing Gradebook...";
-
-    try {
-        // Fetch all submissions for this assignment to ensure the score is 100% accurate
-        const { data: finalSubmissions } = await supabaseClient
-            .from('code_submissions')
-            .select('score')
-            .eq('user_id', currentUser.id)
-            .eq('assignment_id', assignmentId);
-
-        const totalEarned = finalSubmissions?.reduce((a, b) => a + (b.score || 0), 0) || 0;
-        const totalPossible = problems.reduce((a, b) => a + b.points, 0);
-        
-        showFinalScore(totalEarned, totalPossible);
-    } catch (err) {
-        console.error("End Assignment Error:", err);
-        alert("An error occurred while saving your final score. Please contact support.");
-    } finally {
-        document.getElementById('loading-overlay').style.display = 'none';
-    }
-}
-
-        function showFinalScore(score, total) {
-            document.getElementById('final-score-display').innerText = `${score} / ${total}`;
-            document.getElementById('result-view').style.display = 'flex';
+        async function endExam() {
+            clearInterval(timerInterval);
+            alert("Exam complete. Returning to dashboard.");
+            window.location.href = 'student-dashboard.html';
         }
 
         init();
