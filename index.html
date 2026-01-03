@@ -166,54 +166,41 @@
     }
 
     async function handleRegister(e) {
-        e.preventDefault();
-        const msg = document.getElementById('status-msg');
-        
-        const email = document.getElementById('reg-email').value;
-        const password = document.getElementById('reg-pass').value;
-        
-        // Collect all 10 custom data points
-        const profileData = {
-            full_name: document.getElementById('reg-name').value,
-            mobile_number: document.getElementById('reg-phone').value,
-            age: parseInt(document.getElementById('reg-age').value),
-            gender: document.getElementById('reg-gender').value,
-            college_name: document.getElementById('reg-college').value,
-            degree: document.getElementById('reg-degree').value,
-            year_of_study: document.getElementById('reg-year').value,
-            city: document.getElementById('reg-city').value
-        };
-
-        // 1. Sign up the user in Supabase Auth
-        const { data: authData, error: authError } = await supabaseClient.auth.signUp({ 
-            email, 
-            password,
-            options: { data: { full_name: profileData.full_name } }
-        });
-
-        if (authError) {
-            msg.innerText = authError.message;
-            msg.className = 'msg error';
-            msg.style.display = 'block';
-            return;
+    e.preventDefault();
+    const msg = document.getElementById('status-msg');
+    msg.style.display = 'none';
+    
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-pass').value;
+    
+    // We send all 10 points inside the 'data' object
+    const { data, error } = await supabaseClient.auth.signUp({ 
+        email, 
+        password,
+        options: { 
+            data: { 
+                full_name: document.getElementById('reg-name').value,
+                mobile_number: document.getElementById('reg-phone').value,
+                age: parseInt(document.getElementById('reg-age').value),
+                gender: document.getElementById('reg-gender').value,
+                college_name: document.getElementById('reg-college').value,
+                degree: document.getElementById('reg-degree').value,
+                year_of_study: document.getElementById('reg-year').value,
+                city: document.getElementById('reg-city').value
+            } 
         }
+    });
 
-        // 2. Insert extra data into the 'profiles' table
-        if (authData.user) {
-            const { error: profileError } = await supabaseClient
-                .from('profiles')
-                .insert([{ id: authData.user.id, ...profileData }]);
-
-            if (profileError) {
-                msg.innerText = "Auth success, but profile failed: " + profileError.message;
-                msg.className = 'msg error';
-            } else {
-                msg.innerText = "Registration successful! Please check your email or Login.";
-                msg.className = 'msg success';
-            }
-            msg.style.display = 'block';
-        }
+    if (error) {
+        msg.innerText = error.message;
+        msg.className = 'msg error';
+        msg.style.display = 'block';
+    } else {
+        msg.innerText = "Registration Successful! Please check your email for a confirmation link.";
+        msg.className = 'msg success';
+        msg.style.display = 'block';
     }
+}
 </script>
 </body>
 </html>
