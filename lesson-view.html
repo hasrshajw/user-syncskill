@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Portal - Ihtnas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        :root {
+            --body-bg: #FFFFFF; --sidebar-bg: #F9FAFB; --border-color: #E5E7EB;
+            --text-primary: #111827; --text-secondary: #6B7280; --brand-purple: #6D28D9;
+            --success: #10B981; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; color: var(--text-primary); background: var(--body-bg); line-height: 1.6; }
+
+        /* Layout */
+        .viewer-container { display: grid; grid-template-columns: 1fr 320px; height: 100vh; }
+
+        /* Content Area */
+        .content-area { overflow-y: auto; display: flex; flex-direction: column; }
+        .content-header { padding: 1.5rem 3rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 10; }
+        .btn-exit { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-secondary); font-weight: 600; }
+
+        .lesson-body { padding: 3rem; max-width: 900px; margin: 0 auto; width: 100%; flex: 1; }
+        .lesson-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 2rem; color: #000; }
+        .html-content img { max-width: 100%; border-radius: 12px; margin: 1.5rem 0; }
+        .html-content h2, .html-content h3 { margin: 2rem 0 1rem 0; }
+
+        /* Quiz UI */
+        .quiz-container { display: flex; flex-direction: column; gap: 2rem; }
+        .question-card { background: var(--sidebar-bg); padding: 2rem; border-radius: 16px; border: 1px solid var(--border-color); }
+        .options-grid { display: grid; gap: 10px; margin-top: 1.5rem; }
+        .option-btn { background: white; border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 12px; }
+        .option-btn:hover { border-color: var(--brand-purple); background: var(--brand-purple-light); }
+        .option-btn.selected { border-color: var(--brand-purple); background: #F5F3FF; color: var(--brand-purple); box-shadow: 0 0 0 2px var(--brand-purple); }
+
+        /* Footer Navigation */
+        .content-footer { padding: 1.5rem 3rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; background: white; }
+        .btn-nav { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; text-decoration: none; }
+        .btn-prev { background: #eee; color: var(--text-primary); }
+        .btn-next { background: var(--brand-purple); color: white; }
+        .btn-complete { background: var(--success); color: white; }
+
+        /* Sidebar */
+        .sidebar { background: var(--sidebar-bg); border-left: 1px solid var(--border-color); overflow-y: auto; padding: 1.5rem; }
+        .sidebar h3 { font-size: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; text-decoration: none; color: var(--text-primary); margin-bottom: 5px; font-size: 0.9rem; transition: 0.2s; }
+        .nav-item:hover { background: #E5E7EB; }
+        .nav-item.active { background: white; box-shadow: var(--shadow); color: var(--brand-purple); font-weight: 700; }
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.done i { color: var(--success); }
+
+        @media (max-width: 1024px) {
+            .viewer-container { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .lesson-body { padding: 1.5rem; }
+            .content-header, .content-footer { padding: 1rem 1.5rem; }
+        }
+
+        #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">Opening Lesson...</div>
+
+    <div class="viewer-container">
+        <!-- Main Content -->
+        <div class="content-area">
+            <header class="content-header">
+                <a href="#" id="exit-btn" class="btn-exit"><i class='bx bx-x' style="font-size: 1.5rem;"></i> Close Player</a>
+                <div id="progress-text" style="font-weight: 700; color: var(--brand-purple);">0% Complete</div>
+            </header>
+
+            <div class="lesson-body">
+                <h1 class="lesson-title" id="lesson-title">Loading...</h1>
+                <div id="lesson-main-content" class="html-content">
+                    <!-- HTML text or Quiz Questions go here -->
+                </div>
+            </div>
+
+            <footer class="content-footer">
+                <a href="#" id="prev-btn" class="btn-nav btn-prev"><i class='bx bx-chevron-left'></i> Previous</a>
+                <button id="complete-btn" class="btn-nav btn-complete" onclick="markComplete()">Mark as Completed <i class='bx bx-check-double'></i></button>
+                <a href="#" id="next-btn" class="btn-nav btn-next">Next Lesson <i class='bx bx-chevron-right'></i></a>
+            </footer>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h3>Course Content</h3>
+            <div id="course-sidebar-nav">
+                <!-- List of all lessons injected here -->
+            </div>
+        </aside>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const lessonId = urlParams.get('id');
+        const courseId = urlParams.get('course');
+
+        let currentUser = null;
+        let currentLesson = null;
+        let allLessons = [];
+        let completedSet = new Set();
+
+        async function initViewer() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session || !lessonId) { window.location.href = 'student-dashboard.html'; return; }
+            currentUser = session.user;
+
+            await fetchLessonData();
+            await fetchSidebarNav();
+            await updateLastAccessed();
+            
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        async function fetchLessonData() {
+            // Fetch current lesson and progress status
+            const [lessonRes, progressRes] = await Promise.all([
+                supabaseClient.from('lessons').select('*').eq('id', lessonId).single(),
+                supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id).eq('content_node_id', lessonId)
+            ]);
+
+            if (lessonRes.error) return;
+            currentLesson = lessonRes.data;
+            
+            document.getElementById('lesson-title').innerText = currentLesson.title;
+            document.getElementById('exit-btn').href = `view-course.html?id=${currentLesson.course_id}`;
+
+            if (progressRes.data?.length > 0) {
+                document.getElementById('complete-btn').style.display = 'none';
+            }
+
+            if (currentLesson.type === 'lesson') {
+                document.getElementById('lesson-main-content').innerHTML = currentLesson.content;
+            } else {
+                renderQuiz(currentLesson.payload);
+            }
+        }
+
+        function renderQuiz(questions) {
+            const container = document.getElementById('lesson-main-content');
+            if (!questions || questions.length === 0) {
+                container.innerHTML = "<p>No questions in this quiz.</p>";
+                return;
+            }
+
+            container.innerHTML = `<div class="quiz-container">` + questions.map((q, qIdx) => `
+                <div class="question-card">
+                    <p style="font-weight: 700; font-size: 1.1rem;">${qIdx + 1}. ${q.title}</p>
+                    <div class="options-grid">
+                        ${q.options.map((opt, oIdx) => `
+                            <button class="option-btn" onclick="selectOption(this, ${qIdx}, ${oIdx})">
+                                <i class='bx bx-circle'></i> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('') + `</div>`;
+        }
+
+        function selectOption(btn, qIdx, oIdx) {
+            const card = btn.closest('.question-card');
+            card.querySelectorAll('.option-btn').forEach(b => {
+                b.classList.remove('selected');
+                b.querySelector('i').className = 'bx bx-circle';
+            });
+            btn.classList.add('selected');
+            btn.querySelector('i').className = 'bx bxs-check-circle';
+        }
+
+        async function fetchSidebarNav() {
+            // Fetch all lessons for this course to build the sidebar and prev/next
+            const { data: lessons } = await supabaseClient
+                .from('lessons')
+                .select('id, title, type, chapter_index, order_index')
+                .eq('course_id', currentLesson.course_id)
+                .order('chapter_index', { ascending: true })
+                .order('order_index', { ascending: true });
+
+            const { data: progress } = await supabaseClient
+                .from('progress')
+                .select('content_node_id')
+                .eq('user_id', currentUser.id);
+
+            progress?.forEach(p => completedSet.add(p.content_node_id));
+            allLessons = lessons;
+
+            const navContainer = document.getElementById('course-sidebar-nav');
+            navContainer.innerHTML = lessons.map(l => `
+                <a href="lesson-view.html?id=${l.id}&course=${courseId}" class="nav-item ${l.id === lessonId ? 'active' : ''} ${completedSet.has(l.id) ? 'done' : ''}">
+                    <i class='bx ${completedSet.has(l.id) ? 'bxs-check-circle' : (l.type === 'quiz' ? 'bx-help-circle' : 'bx-file')}'></i>
+                    <span>${l.title}</span>
+                </a>
+            `).join('');
+
+            // Setup Prev/Next links
+            const idx = lessons.findIndex(l => l.id === lessonId);
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            if (idx > 0) prevBtn.href = `lesson-view.html?id=${lessons[idx-1].id}&course=${courseId}`;
+            else prevBtn.style.visibility = 'hidden';
+
+            if (idx < lessons.length - 1) nextBtn.href = `lesson-view.html?id=${lessons[idx+1].id}&course=${courseId}`;
+            else nextBtn.style.visibility = 'hidden';
+
+            // Overall progress percent
+            const percent = Math.round((completedSet.size / lessons.length) * 100);
+            document.getElementById('progress-text').innerText = `${percent}% Complete`;
+        }
+
+        async function updateLastAccessed() {
+            await supabaseClient
+                .from('enrollments')
+                .update({ last_accessed_node_id: lessonId })
+                .eq('user_id', currentUser.id)
+                .eq('course_id', currentLesson.course_id);
+        }
+
+        async function markComplete() {
+            const btn = document.getElementById('complete-btn');
+            btn.disabled = true;
+            btn.innerText = "Saving...";
+
+            // 1. Add to progress table
+            const { error: pError } = await supabaseClient
+                .from('progress')
+                .insert([{ user_id: currentUser.id, content_node_id: lessonId }]);
+
+            if (!pError) {
+                // 2. Grant XP Points (Advanced Logic: 10 XP per lesson)
+                await supabaseClient.rpc('increment_user_xp', { amount: 10 });
+                
+                alert("Goal Reached! +10 XP earned.");
+                window.location.reload();
+            } else {
+                btn.disabled = false;
+                btn.innerText = "Mark as Completed";
+            }
+        }
+
+        initViewer();
+    </script>
+</body>
+</html>
