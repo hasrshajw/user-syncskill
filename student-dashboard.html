@@ -1,122 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - Ihtnas</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <style>
-        :root { 
-            --body-bg: #F3F4F6; --widget-bg: #FFFFFF; --border-color: #E5E7EB; 
-            --text-primary: #111827; --text-secondary: #4B5563; --brand-purple: #6D28D9; 
-            --brand-purple-light: #F5F3FF; --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--body-bg); color: var(--text-primary); font-size: 14px; }
-
-        /* Header */
-        .header { background: var(--widget-bg); padding: 0.75rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        
-        /* Course Switcher Styles */
-        .course-switcher-container { position: relative; }
-        .course-selector-btn { 
-            display: flex; align-items: center; gap: 10px; background: var(--brand-purple-light); 
-            padding: 8px 16px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(109, 40, 217, 0.2);
-            font-weight: 700; color: var(--brand-purple); transition: 0.2s;
-        }
-        .course-selector-btn:hover { background: #EDE9FE; }
-        
-        .course-dropdown { 
-            position: absolute; top: 110%; left: 0; width: 250px; background: white; 
-            border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
-            border: 1px solid var(--border-color); display: none; z-index: 200; overflow: hidden;
-        }
-        .course-dropdown.active { display: block; }
-        .course-opt { padding: 12px 16px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
-        .course-opt:hover { background: var(--hover-bg); }
-        .course-opt.active { background: var(--brand-purple-light); color: var(--brand-purple); }
-        .add-course-opt { background: #fafafa; color: var(--text-secondary); font-weight: 600; text-align: center; justify-content: center; }
-
-        .profile-trigger { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 10px; border-radius: 12px; }
-        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #ddd; }
-        
-        /* Layout Grid */
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
-        .widget { background: var(--widget-bg); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 1.5rem; }
-        .widget-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
-
-        /* Continue Learning Card */
-        .continue-card { background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%); color: white; border: none; }
-        .btn-continue { background: white; color: var(--brand-purple); padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; display: inline-block; }
-
-        /* Responsive */
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .header { padding: 0.75rem 1rem; } }
-    </style>
-</head>
-<body>
-
-    <header class="header">
-        <!-- New Course Switcher -->
-        <div class="course-switcher-container">
-            <div class="course-selector-btn" id="active-course-display" onclick="toggleCourseDropdown()">
-                <i class='bx bx-book-bookmark'></i>
-                <span id="current-course-name">Loading Course...</span>
-                <i class='bx bx-chevron-down'></i>
-            </div>
-            <div class="course-dropdown" id="course-dropdown">
-                <div id="enrolled-list-dropdown"></div>
-                <div class="course-opt add-course-opt" onclick="window.location.href='courses.html'">
-                    <i class='bx bx-plus-circle'></i> Enroll New Course
-                </div>
-            </div>
-        </div>
-
-        <div class="profile-trigger" onclick="window.location.href='profile.html'">
-            <div style="text-align: right;">
-                <p id="user-name" style="font-weight: 700;">Student</p>
-                <p id="user-points" style="font-size: 0.75rem; color: var(--success); font-weight: 600;">0 XP</p>
-            </div>
-            <img src="" id="user-avatar" class="avatar">
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="main-content">
-            <!-- Continue Learning (Filtered by Course) -->
-            <div class="widget continue-card" id="continue-widget">
-                <h4 id="context-label">CONTINUE STUDYING</h4>
-                <h2 id="lesson-title">Select a course to start</h2>
-                <p id="course-name-display" style="margin-bottom: 1.5rem; opacity: 0.9;"></p>
-                <a href="#" id="continue-link" class="btn-continue" style="display: none;">Continue Lesson</a>
-            </div>
-
-            <div class="widget">
-                <h3 class="widget-title"><i class='bx bx-list-ul'></i> Course Syllabus</h3>
-                <div id="course-syllabus" style="color: #666; font-style: italic;">Select a course to see your progress.</div>
-            </div>
-        </div>
-
-        <div class="sidebar">
-            <!-- Streak -->
-            <div class="widget">
-                <h3 class="widget-title"><i class='bx bxs-flame' style="color: #FF5722;"></i> Learning Streak</h3>
-                <div style="text-align: center; background: var(--brand-purple-light); padding: 1rem; border-radius: 12px;">
-                    <strong id="streak-total" style="font-size: 2rem; color: var(--brand-purple);">0</strong>
-                    <span style="display: block; font-size: 0.8rem; color: var(--text-secondary);">Days Continuous Learning</span>
-                </div>
-            </div>
-
-            <!-- Leaderboard (Course-Specific) -->
-            <div class="widget">
-                <h3 class="widget-title"><i class='bx bxs-trophy' style="color: var(--warning);"></i> Course Leaderboard</h3>
-                <div id="leaderboard-list"></div>
-            </div>
-        </div>
-    </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
@@ -137,6 +18,15 @@
         if(activeCourseId) {
             await refreshDashboardData();
         }
+    }
+
+    // NEW: Function to clear UI so old course data disappears immediately
+    function resetCourseUI() {
+        document.getElementById('user-points').innerText = "Calculating XP...";
+        document.getElementById('course-syllabus').innerHTML = '<p style="color:#999;">Loading syllabus...</p>';
+        document.getElementById('leaderboard-list').innerHTML = '<p style="color:#999;">Updating rankings...</p>';
+        document.getElementById('lesson-title').innerText = "Loading...";
+        document.getElementById('continue-link').style.display = 'none';
     }
 
     async function loadEnrollments() {
@@ -173,28 +63,65 @@
     }
 
     async function setActiveCourse(id, name) {
+        if(id === activeCourseId) return; // Don't reload if same course
+        
+        resetCourseUI(); // Clear old data immediately
+        
         localStorage.setItem('active_course_id', id);
         activeCourseId = id;
         document.getElementById('course-dropdown').classList.remove('active');
+        
         await loadEnrollments();
         await refreshDashboardData();
     }
 
     async function refreshDashboardData() {
-        await loadProfile();
-        await loadCourseContext();
-        await loadLeaderboard();
-        await loadCourseSyllabus(); // Added this
+        // Run these in parallel for speed
+        await Promise.all([
+            loadProfile(),
+            loadCourseContext(),
+            loadLeaderboard(),
+            loadCourseSyllabus(),
+            loadCourseXP() // New function to show XP for THIS course only
+        ]);
     }
 
     async function loadProfile() {
         const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
         if (profile) {
             document.getElementById('user-name').innerText = profile.full_name || "Student";
-            document.getElementById('user-points').innerText = `${profile.total_points || 0} XP`;
             document.getElementById('user-avatar').src = profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.full_name}`;
             document.getElementById('streak-total').innerText = profile.current_streak || 0;
         }
+    }
+
+    // New logic to calculate XP only for the current course
+    async function loadCourseXP() {
+        // 1. Get lessons for this course
+        const { data: lessons } = await supabaseClient.from('lessons').select('id').eq('course_id', activeCourseId);
+        const lessonIds = lessons?.map(l => l.id) || [];
+
+        // 2. Count progress (10 XP per lesson)
+        const { count: progressCount } = await supabaseClient
+            .from('progress')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', currentUser.id)
+            .in('content_node_id', lessonIds);
+
+        // 3. Get Exam Scores for this course
+        const { data: exams } = await supabaseClient.from('exams').select('id').eq('course_id', activeCourseId);
+        const examIds = exams?.map(e => e.id) || [];
+        
+        const { data: submissions } = await supabaseClient
+            .from('exam_submissions')
+            .select('score')
+            .eq('user_id', currentUser.id)
+            .in('exam_id', examIds);
+
+        const examScore = submissions?.reduce((acc, curr) => acc + (curr.score || 0), 0) || 0;
+        const totalCourseXP = (progressCount * 10) + examScore;
+
+        document.getElementById('user-points').innerText = `${totalCourseXP} XP (This Course)`;
     }
 
     async function loadCourseContext() {
@@ -229,11 +156,8 @@
     async function loadCourseSyllabus() {
         const container = document.getElementById('course-syllabus');
         
-        // 1. Get Course Chapters
         const { data: course } = await supabaseClient.from('courses').select('chapters').eq('id', activeCourseId).single();
-        // 2. Get All Lessons
         const { data: lessons } = await supabaseClient.from('lessons').select('*').eq('course_id', activeCourseId).order('order_index', { ascending: true });
-        // 3. Get User Progress
         const { data: progress } = await supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id);
         
         const completedIds = new Set(progress?.map(p => p.content_node_id));
@@ -261,7 +185,6 @@
     }
 
     async function loadLeaderboard() {
-        // This query works ONLY after running the SQL fix in Step 1
         const { data: enrollments, error } = await supabaseClient
             .from('enrollments')
             .select('user_id, profiles(full_name, total_points, college_name)')
@@ -307,5 +230,3 @@
 
     initDashboard();
 </script>
-</body>
-</html>
