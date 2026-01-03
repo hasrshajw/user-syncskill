@@ -118,170 +118,194 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+    const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-        let activeCourseId = localStorage.getItem('active_course_id');
+    let currentUser = null;
+    let activeCourseId = localStorage.getItem('active_course_id');
 
-        async function initDashboard() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
-            currentUser = session.user;
+    async function initDashboard() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return; }
+        currentUser = session.user;
 
-            await updateDailyActivity(); 
-            await loadEnrollments(); 
-            
-            if(activeCourseId) {
-                await refreshDashboardData();
-            }
-        }
-
-        async function loadEnrollments() {
-            const { data: enrollments, error } = await supabaseClient
-                .from('enrollments')
-                .select('course_id, courses(name)')
-                .eq('user_id', currentUser.id);
-
-            if (error) return console.error("Enrollment Error:", error);
-
-            const dropdown = document.getElementById('enrolled-list-dropdown');
-            
-            if (!enrollments || enrollments.length === 0) {
-                document.getElementById('current-course-name').innerText = "No Courses";
-                document.getElementById('course-syllabus').innerText = "Please enroll in a course first.";
-                return;
-            }
-
-            // Set active course if none exists
-            if (!activeCourseId || !enrollments.find(e => e.course_id === activeCourseId)) {
-                activeCourseId = enrollments[0].course_id;
-                localStorage.setItem('active_course_id', activeCourseId);
-            }
-
-            dropdown.innerHTML = enrollments.map(e => `
-                <div class="course-opt ${e.course_id === activeCourseId ? 'active' : ''}" 
-                     onclick="setActiveCourse('${e.course_id}', '${e.courses.name}')">
-                    <span>${e.courses.name}</span>
-                    ${e.course_id === activeCourseId ? "<i class='bx bx-check-circle'></i>" : ""}
-                </div>
-            `).join('');
-
-            const current = enrollments.find(e => e.course_id === activeCourseId);
-            if(current) document.getElementById('current-course-name').innerText = current.courses.name;
-        }
-
-        async function setActiveCourse(id, name) {
-            localStorage.setItem('active_course_id', id);
-            activeCourseId = id;
-            document.getElementById('course-dropdown').classList.remove('active');
-            await loadEnrollments();
+        await updateDailyActivity(); 
+        await loadEnrollments(); 
+        
+        if(activeCourseId) {
             await refreshDashboardData();
         }
+    }
 
-        async function refreshDashboardData() {
-            await loadProfile();
-            await loadCourseContext();
-            await loadLeaderboard();
+    async function loadEnrollments() {
+        const { data: enrollments, error } = await supabaseClient
+            .from('enrollments')
+            .select('course_id, courses(name)')
+            .eq('user_id', currentUser.id);
+
+        if (error) return console.error("Enrollment Error:", error);
+
+        const dropdown = document.getElementById('enrolled-list-dropdown');
+        
+        if (!enrollments || enrollments.length === 0) {
+            document.getElementById('current-course-name').innerText = "No Courses";
+            document.getElementById('course-syllabus').innerText = "Please enroll in a course first.";
+            return;
         }
 
-        async function loadProfile() {
-            const { data: profile, error } = await supabaseClient
-                .from('profiles')
-                .select('*')
-                .eq('id', currentUser.id)
-                .maybeSingle(); // maybeSingle avoids 406 if row is missing
-
-            if (error) console.error("Profile Error:", error);
-            if (profile) {
-                document.getElementById('user-name').innerText = profile.full_name || "Student";
-                document.getElementById('user-points').innerText = `${profile.total_points || 0} XP`;
-                document.getElementById('user-avatar').src = profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.full_name}`;
-                document.getElementById('streak-total').innerText = profile.current_streak || 0;
-            }
+        if (!activeCourseId || !enrollments.find(e => e.course_id === activeCourseId)) {
+            activeCourseId = enrollments[0].course_id;
+            localStorage.setItem('active_course_id', activeCourseId);
         }
 
-        async function loadCourseContext() {
-            const { data: enrollment, error } = await supabaseClient
-                .from('enrollments')
-                .select('*, courses(name), last_accessed_node_id')
-                .eq('user_id', currentUser.id)
-                .eq('course_id', activeCourseId)
-                .maybeSingle();
+        dropdown.innerHTML = enrollments.map(e => `
+            <div class="course-opt ${e.course_id === activeCourseId ? 'active' : ''}" 
+                 onclick="setActiveCourse('${e.course_id}', '${e.courses.name}')">
+                <span>${e.courses.name}</span>
+                ${e.course_id === activeCourseId ? "<i class='bx bx-check-circle'></i>" : ""}
+            </div>
+        `).join('');
 
-            if (enrollment) {
-                document.getElementById('course-name-display').innerText = enrollment.courses.name;
-                
-                if (enrollment.last_accessed_node_id) {
-                    const { data: lesson } = await supabaseClient
-                        .from('lessons')
-                        .select('title')
-                        .eq('id', enrollment.last_accessed_node_id)
-                        .maybeSingle();
-                    
-                    if (lesson) {
-                        document.getElementById('lesson-title').innerText = lesson.title;
-                        document.getElementById('continue-link').style.display = 'inline-block';
-                        document.getElementById('continue-link').href = `lesson-view.html?id=${enrollment.last_accessed_node_id}&course=${activeCourseId}`;
-                    }
-                } else {
-                    document.getElementById('lesson-title').innerText = "Ready to start learning?";
-                    document.getElementById('continue-link').style.display = 'inline-block';
-                    document.getElementById('continue-link').innerText = "Start First Lesson";
-                    document.getElementById('continue-link').href = `view-course.html?id=${activeCourseId}`;
+        const current = enrollments.find(e => e.course_id === activeCourseId);
+        if(current) document.getElementById('current-course-name').innerText = current.courses.name;
+    }
+
+    async function setActiveCourse(id, name) {
+        localStorage.setItem('active_course_id', id);
+        activeCourseId = id;
+        document.getElementById('course-dropdown').classList.remove('active');
+        await loadEnrollments();
+        await refreshDashboardData();
+    }
+
+    async function refreshDashboardData() {
+        await loadProfile();
+        await loadCourseContext();
+        await loadLeaderboard();
+        await loadCourseSyllabus(); // Added this
+    }
+
+    async function loadProfile() {
+        const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+        if (profile) {
+            document.getElementById('user-name').innerText = profile.full_name || "Student";
+            document.getElementById('user-points').innerText = `${profile.total_points || 0} XP`;
+            document.getElementById('user-avatar').src = profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.full_name}`;
+            document.getElementById('streak-total').innerText = profile.current_streak || 0;
+        }
+    }
+
+    async function loadCourseContext() {
+        const { data: enrollment } = await supabaseClient
+            .from('enrollments')
+            .select('*, courses(name), last_accessed_node_id')
+            .eq('user_id', currentUser.id)
+            .eq('course_id', activeCourseId)
+            .maybeSingle();
+
+        if (enrollment) {
+            document.getElementById('course-name-display').innerText = enrollment.courses.name;
+            const link = document.getElementById('continue-link');
+            
+            if (enrollment.last_accessed_node_id) {
+                const { data: lesson } = await supabaseClient.from('lessons').select('title').eq('id', enrollment.last_accessed_node_id).maybeSingle();
+                if (lesson) {
+                    document.getElementById('lesson-title').innerText = lesson.title;
+                    link.style.display = 'inline-block';
+                    link.innerText = "Continue Lesson";
+                    link.href = `lesson-view.html?id=${enrollment.last_accessed_node_id}&course=${activeCourseId}`;
                 }
+            } else {
+                document.getElementById('lesson-title').innerText = "Ready to start?";
+                link.style.display = 'inline-block';
+                link.innerText = "Start First Lesson";
+                link.href = `view-course.html?id=${activeCourseId}`;
             }
         }
+    }
 
-        async function loadLeaderboard() {
-            // Corrected order syntax for joined tables
-            const { data: enrollments, error } = await supabaseClient
-                .from('enrollments')
-                .select('user_id, profiles(full_name, total_points, college_name)')
-                .eq('course_id', activeCourseId)
-                .order('total_points', { foreignTable: 'profiles', ascending: false })
-                .limit(5);
+    async function loadCourseSyllabus() {
+        const container = document.getElementById('course-syllabus');
+        
+        // 1. Get Course Chapters
+        const { data: course } = await supabaseClient.from('courses').select('chapters').eq('id', activeCourseId).single();
+        // 2. Get All Lessons
+        const { data: lessons } = await supabaseClient.from('lessons').select('*').eq('course_id', activeCourseId).order('order_index', { ascending: true });
+        // 3. Get User Progress
+        const { data: progress } = await supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id);
+        
+        const completedIds = new Set(progress?.map(p => p.content_node_id));
 
-            if (error) return console.error("Leaderboard Error:", error);
+        if (!course || !lessons) return;
 
-            const container = document.getElementById('leaderboard-list');
-            if (enrollments) {
-                container.innerHTML = enrollments.map((e, idx) => `
-                    <div class="leader-item">
-                        <span class="rank">${idx + 1}</span>
-                        <div class="leader-info">
-                            <p class="name">${e.profiles?.full_name || 'Anonymous'}</p>
-                            <p class="college">${e.profiles?.college_name || 'Individual'}</p>
-                        </div>
-                        <span class="xp">${e.profiles?.total_points || 0} XP</span>
+        let html = '';
+        course.chapters.forEach((chName, chIdx) => {
+            const chLessons = lessons.filter(l => l.chapter_index === chIdx);
+            if (chLessons.length === 0) return;
+
+            html += `<div style="margin-top:15px;"><strong style="font-size:0.8rem; color:var(--brand-purple); text-transform:uppercase;">${chName}</strong>`;
+            chLessons.forEach(l => {
+                const isDone = completedIds.has(l.id);
+                html += `
+                    <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f9f9f9; cursor:pointer;" onclick="window.location.href='lesson-view.html?id=${l.id}&course=${activeCourseId}'">
+                        <i class='bx ${isDone ? 'bxs-check-circle' : 'bx-circle'}' style="color: ${isDone ? 'var(--success)' : '#ccc'}"></i>
+                        <span style="font-size:0.9rem; ${isDone ? 'color:#999; text-decoration:line-through;' : ''}">${l.title}</span>
                     </div>
-                `).join('');
-            }
-        }
+                `;
+            });
+            html += `</div>`;
+        });
+        container.innerHTML = html;
+    }
 
-        function toggleCourseDropdown() {
-            document.getElementById('course-dropdown').classList.toggle('active');
-        }
+    async function loadLeaderboard() {
+        // This query works ONLY after running the SQL fix in Step 1
+        const { data: enrollments, error } = await supabaseClient
+            .from('enrollments')
+            .select('user_id, profiles(full_name, total_points, college_name)')
+            .eq('course_id', activeCourseId)
+            .order('total_points', { foreignTable: 'profiles', ascending: false })
+            .limit(5);
 
-        async function updateDailyActivity() {
-            const today = new Date().toISOString().split('T')[0];
-            // Added onConflict to prevent 409
-            await supabaseClient.from('daily_activity').upsert(
-                { user_id: currentUser.id, activity_date: today },
-                { onConflict: 'user_id,activity_date' }
-            );
-        }
+        if (error) return console.error("Leaderboard Error:", error);
 
-        window.onclick = function(event) {
-            if (!event.target.closest('.course-switcher-container')) {
-                const dropdown = document.getElementById('course-dropdown');
-                if (dropdown) dropdown.classList.remove('active');
-            }
+        const container = document.getElementById('leaderboard-list');
+        if (enrollments) {
+            container.innerHTML = enrollments.map((e, idx) => `
+                <div class="leader-item">
+                    <span class="rank">${idx + 1}</span>
+                    <div class="leader-info">
+                        <p class="name">${e.profiles?.full_name || 'Anonymous'}</p>
+                        <p class="college">${e.profiles?.college_name || 'Individual'}</p>
+                    </div>
+                    <span class="xp">${e.profiles?.total_points || 0} XP</span>
+                </div>
+            `).join('');
         }
+    }
 
-        initDashboard();
-    </script>
+    function toggleCourseDropdown() {
+        document.getElementById('course-dropdown').classList.toggle('active');
+    }
+
+    async function updateDailyActivity() {
+        const today = new Date().toISOString().split('T')[0];
+        await supabaseClient.from('daily_activity').upsert(
+            { user_id: currentUser.id, activity_date: today },
+            { onConflict: 'user_id,activity_date' }
+        );
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.closest('.course-switcher-container')) {
+            const dropdown = document.getElementById('course-dropdown');
+            if (dropdown) dropdown.classList.remove('active');
+        }
+    }
+
+    initDashboard();
+</script>
 </body>
 </html>
