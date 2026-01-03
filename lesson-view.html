@@ -11,7 +11,7 @@
         :root {
             --body-bg: #FFFFFF; --sidebar-bg: #F9FAFB; --border-color: #E5E7EB;
             --text-primary: #111827; --text-secondary: #6B7280; --brand-purple: #6D28D9;
-            --brand-purple-light: #F5F3FF; --success: #10B981; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --brand-purple-light: #F5F3FF; --success: #10B981; --danger: #EF4444; --shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'IBM Plex Sans', sans-serif; color: var(--text-primary); background: var(--body-bg); line-height: 1.6; height: 100vh; overflow: hidden; }
@@ -25,24 +25,23 @@
         .btn-exit { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-secondary); font-weight: 700; transition: 0.2s; }
         .btn-exit:hover { color: var(--brand-purple); }
 
-        .lesson-body { padding: 3rem 2rem; max-width: 850px; margin: 0 auto; width: 100%; flex: 1; }
+        .lesson-body { padding: 3rem 2.5rem; max-width: 900px; margin: 0 auto; width: 100%; flex: 1; }
         .lesson-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 1.5rem; color: #000; line-height: 1.2; }
         
-        /* HTML Content Styling */
         .html-content { font-size: 1.1rem; color: #374151; }
-        .html-content img { max-width: 100%; border-radius: 12px; margin: 1.5rem 0; box-shadow: var(--shadow); }
-        .html-content h2 { margin: 2.5rem 0 1rem 0; font-size: 1.6rem; color: #000; border-left: 5px solid var(--brand-purple); padding-left: 15px; }
-        .html-content pre { background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 12px; overflow-x: auto; margin: 1.5rem 0; font-family: 'Consolas', monospace; font-size: 0.95rem; }
+        .html-content pre { background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 12px; overflow-x: auto; margin: 1.5rem 0; font-family: monospace; }
+        .html-content img { max-width: 100%; border-radius: 12px; margin: 1.5rem 0; }
 
-        /* Quiz Styling */
+        /* Quiz UI */
         .quiz-container { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2rem; }
-        .question-card { background: var(--sidebar-bg); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-color); }
+        .question-card { background: var(--sidebar-bg); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-color); transition: 0.3s; }
+        .question-card.wrong { border-color: var(--danger); background: #FEF2F2; }
         .options-grid { display: grid; gap: 10px; margin-top: 1.25rem; }
         .option-btn { background: white; border: 1px solid var(--border-color); padding: 14px 18px; border-radius: 12px; text-align: left; cursor: pointer; transition: 0.2s; font-weight: 600; display: flex; align-items: center; gap: 12px; width: 100%; }
-        .option-btn:hover { border-color: var(--brand-purple); background: var(--brand-purple-light); }
+        .option-btn:hover { border-color: var(--brand-purple); }
         .option-btn.selected { border-color: var(--brand-purple); background: var(--brand-purple-light); color: var(--brand-purple); }
 
-        /* Navigation Footer */
+        /* Footer Navigation */
         .content-footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; background: white; align-items: center; }
         .btn-nav { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; text-decoration: none; font-size: 0.95rem; }
         .btn-prev { background: #F3F4F6; color: var(--text-primary); }
@@ -50,7 +49,7 @@
         .btn-complete { background: var(--success); color: white; }
         .btn-complete:disabled { background: #D1FAE5; color: #065F46; cursor: not-allowed; opacity: 1; }
 
-        /* Sidebar */
+        /* Sidebar Navigation */
         .sidebar { background: var(--sidebar-bg); border-left: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; }
         .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: white; }
         .sidebar-header h3 { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
@@ -63,33 +62,30 @@
 
         #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
 
-        @media (max-width: 1024px) {
-            .viewer-container { grid-template-columns: 1fr; }
-            .sidebar { display: none; }
-        }
+        @media (max-width: 1024px) { .viewer-container { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">Opening Lesson...</div>
+    <div id="loading-overlay">Initializing Secure Player...</div>
 
     <div class="viewer-container">
         <div class="content-area">
             <header class="content-header">
-                <a href="#" id="exit-link" class="btn-exit"><i class='bx bx-arrow-back'></i> Exit Player</a>
-                <div id="progress-indicator" style="font-weight: 800; color: var(--brand-purple); font-size: 0.85rem;">SYNCING...</div>
+                <a href="#" id="exit-link" class="btn-exit"><i class='bx bx-arrow-back'></i> Exit Course</a>
+                <div id="progress-text" style="font-weight: 800; color: var(--brand-purple); font-size: 0.85rem;">SYNCING...</div>
             </header>
 
             <div class="lesson-body">
-                <h1 class="lesson-title" id="lesson-title-text">Please Wait</h1>
-                <div id="lesson-html-container" class="html-content">
-                    <!-- Content Injected Here -->
+                <h1 class="lesson-title" id="lesson-title-display">Please Wait</h1>
+                <div id="content-container" class="html-content">
+                    <!-- Lesson HTML or Quiz Injected here -->
                 </div>
             </div>
 
             <footer class="content-footer">
-                <a href="#" id="nav-prev" class="btn-nav btn-prev"><i class='bx bx-chevron-left'></i> Previous</a>
-                <button id="nav-complete" class="btn-nav btn-complete" onclick="markAsDone()">Mark as Completed <i class='bx bx-check-double'></i></button>
+                <a href="#" id="nav-prev" class="btn-nav btn-prev"><i class='bx bx-chevron-left'></i> Prev</a>
+                <button id="nav-complete" class="btn-nav btn-complete" onclick="processCompletion()">Mark as Done <i class='bx bx-check-double'></i></button>
                 <a href="#" id="nav-next" class="btn-nav btn-next">Next Lesson <i class='bx bx-chevron-right'></i></a>
             </footer>
         </div>
@@ -97,7 +93,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h3>Curriculum</h3>
-                <p id="course-name-sidebar" style="font-weight: 700; font-size: 1rem; margin-top: 5px;"></p>
+                <p id="course-label-sidebar" style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"></p>
             </div>
             <div class="nav-list" id="sidebar-nav"></div>
         </aside>
@@ -115,57 +111,56 @@
 
         let currentUser = null;
         let lessonData = null;
-        let lessonListOrder = [];
+        let curriculumOrder = [];
+        let selectedAnswers = {}; // For Quiz validation
 
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session || !lessonId || !courseId) { window.location.href = 'student-dashboard.html'; return; }
             currentUser = session.user;
 
-            // Security Check
-            const { data: enrolled } = await supabaseClient.from('enrollments').select('course_id').eq('user_id', currentUser.id).eq('course_id', courseId).maybeSingle();
+            // Enrollment Guard
+            const { data: enrolled } = await supabaseClient.from('enrollments').select('id').eq('user_id', currentUser.id).eq('course_id', courseId).maybeSingle();
             if (!enrolled) { window.location.href = 'student-dashboard.html'; return; }
 
-            await fetchPageData();
-            await syncProgressOnOpen();
-            
+            await loadLesson();
+            await syncLastAccessed();
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        async function fetchPageData() {
+        async function loadLesson() {
             try {
+                // Fetch Scoped Progress, Lesson Details, and Sidebar in parallel
                 const [lessonRes, allRes, progressRes] = await Promise.all([
                     supabaseClient.from('lessons').select('*, courses(name)').eq('id', lessonId).single(),
                     supabaseClient.from('lessons').select('id, title, type, chapter_index, order_index').eq('course_id', courseId).order('chapter_index', {ascending: true}).order('order_index', {ascending: true}),
-                    supabaseClient.from('progress').select('*').eq('user_id', currentUser.id).eq('content_node_id', lessonId).maybeSingle()
+                    supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id).eq('content_node_id', lessonId).maybeSingle()
                 ]);
 
                 if (lessonRes.error) throw lessonRes.error;
                 lessonData = lessonRes.data;
-                lessonListOrder = allRes.data;
+                curriculumOrder = allRes.data;
 
-                // UI setup
-                document.getElementById('lesson-title-text').innerText = lessonData.title;
-                document.getElementById('course-name-sidebar').innerText = lessonData.courses.name;
+                // UI Header Setup
+                document.getElementById('lesson-title-display').innerText = lessonData.title;
+                document.getElementById('course-label-sidebar').innerText = lessonData.courses.name;
                 document.getElementById('exit-link').href = `view-course.html?id=${courseId}`;
 
-                // Mark Done UI
-                const btn = document.getElementById('nav-complete');
+                // Mark Done UI Logic
                 if (progressRes.data) {
-                    btn.innerHTML = "Completed <i class='bx bxs-check-circle'></i>";
-                    btn.disabled = true;
+                    updateDoneUI();
                 }
 
-                // Render Content
-                const container = document.getElementById('lesson-html-container');
+                // Render specific content type
+                const container = document.getElementById('content-container');
                 if (lessonData.type === 'lesson') {
-                    container.innerHTML = lessonData.content || '<p>Lesson content is empty.</p>';
+                    container.innerHTML = lessonData.content || '<p>No content provided.</p>';
                 } else {
-                    renderQuiz(lessonData.payload);
+                    renderInteractiveQuiz(lessonData.payload);
                 }
 
-                renderSidebarNav();
-                setupNavButtons();
+                await refreshSidebar();
+                setupNav();
 
             } catch (err) {
                 console.error(err);
@@ -173,80 +168,125 @@
             }
         }
 
-        function renderQuiz(questions) {
-            const container = document.getElementById('lesson-html-container');
+        function renderInteractiveQuiz(questions) {
+            const container = document.getElementById('content-container');
             if (!questions || questions.length === 0) {
-                container.innerHTML = "<p>Quiz is empty.</p>"; return;
+                container.innerHTML = "<p>Quiz setup incomplete.</p>"; return;
             }
             let html = `<div class="quiz-container">`;
-            questions.forEach((q, idx) => {
+            questions.forEach((q, qIdx) => {
                 html += `
-                    <div class="question-card" id="q-${idx}">
-                        <p style="font-weight:700; font-size:1.1rem;">${idx + 1}. ${q.title}</p>
+                    <div class="question-card" id="q-box-${qIdx}">
+                        <p style="font-weight:700;">${qIdx + 1}. ${q.title}</p>
                         <div class="options-grid">
-                            ${q.options.map((opt, oIdx) => `<button class="option-btn" onclick="selectOpt(this, ${idx})"><i class='bx bx-circle'></i> ${opt}</button>`).join('')}
+                            ${q.options.map((opt, oIdx) => `
+                                <button class="option-btn" onclick="selectAnswer(this, ${qIdx}, ${oIdx})">
+                                    <i class='bx bx-circle'></i> ${opt}
+                                </button>
+                            `).join('')}
                         </div>
                     </div>`;
             });
             container.innerHTML = html + `</div>`;
         }
 
-        function selectOpt(btn, qIdx) {
-            const card = document.getElementById(`q-${qIdx}`);
-            card.querySelectorAll('.option-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('i').className = 'bx bx-circle'; });
+        function selectAnswer(btn, qIdx, oIdx) {
+            selectedAnswers[qIdx] = oIdx;
+            const box = document.getElementById(`q-box-${qIdx}`);
+            box.classList.remove('wrong');
+            box.querySelectorAll('.option-btn').forEach(b => {
+                b.classList.remove('selected');
+                b.querySelector('i').className = 'bx bx-circle';
+            });
             btn.classList.add('selected');
             btn.querySelector('i').className = 'bx bxs-check-circle';
         }
 
-        function renderSidebarNav() {
-            const nav = document.getElementById('sidebar-nav');
-            // Fetch student progress for sidebar icons
-            supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id).then(({data}) => {
-                const doneIds = new Set(data?.map(p => p.content_node_id));
-                nav.innerHTML = lessonListOrder.map(l => `
-                    <a href="lesson-view.html?id=${l.id}&course=${courseId}" class="nav-item ${l.id === lessonId ? 'active' : ''} ${doneIds.has(l.id) ? 'done' : ''}">
-                        <i class='bx ${doneIds.has(l.id) ? 'bxs-check-circle' : (l.type === 'quiz' ? 'bx-help-circle' : 'bx-file')}'></i>
-                        <span style="flex:1">${l.title}</span>
-                    </a>
-                `).join('');
-                const percent = Math.round((doneIds.size / lessonListOrder.length) * 100);
-                document.getElementById('progress-indicator').innerText = `${percent}% COMPLETED`;
-            });
-        }
+        async function processCompletion() {
+            // If it's a quiz, we must validate first
+            if (lessonData.type === 'quiz') {
+                const questions = lessonData.payload;
+                let errors = 0;
+                questions.forEach((q, idx) => {
+                    const box = document.getElementById(`q-box-${idx}`);
+                    if (selectedAnswers[idx] !== q.correctAnswer) {
+                        box.classList.add('wrong');
+                        errors++;
+                    }
+                });
 
-        function setupNavButtons() {
-            const idx = lessonListOrder.findIndex(l => l.id === lessonId);
-            const prev = document.getElementById('nav-prev');
-            const next = document.getElementById('nav-next');
+                if (errors > 0) {
+                    alert(`Incomplete: ${errors} answers are incorrect. Please review the highlighted questions.`);
+                    return;
+                }
+            }
 
-            if (idx > 0) prev.href = `lesson-view.html?id=${lessonListOrder[idx - 1].id}&course=${courseId}`;
-            else prev.style.visibility = 'hidden';
-
-            if (idx < lessonListOrder.length - 1) next.href = `lesson-view.html?id=${lessonListOrder[idx + 1].id}&course=${courseId}`;
-            else { next.innerText = "Finish Course"; next.href = `view-course.html?id=${courseId}`; }
-        }
-
-        async function syncProgressOnOpen() {
-            // Log this as the last accessed lesson for the dashboard "Continue" button
-            await supabaseClient.from('enrollments').update({ last_accessed_node_id: lessonId }).eq('user_id', currentUser.id).eq('course_id', courseId);
-        }
-
-        async function markAsDone() {
+            // Logic: Reactive Update (No Reload)
             const btn = document.getElementById('nav-complete');
             btn.disabled = true;
             btn.innerText = "Saving...";
 
-            // NO XP LOGIC HERE - Only track progress
             const { error } = await supabaseClient
                 .from('progress')
                 .insert([{ user_id: currentUser.id, content_node_id: lessonId }]);
 
             if (!error) {
-                window.location.reload(); 
+                updateDoneUI();
+                await refreshSidebar();
+                alert("Progress Synced Successfully!");
             } else {
                 btn.disabled = false;
-                btn.innerText = "Mark as Completed";
+                btn.innerText = "Mark as Done";
             }
+        }
+
+        function updateDoneUI() {
+            const btn = document.getElementById('nav-complete');
+            btn.innerHTML = "Completed <i class='bx bxs-check-circle'></i>";
+            btn.disabled = true;
+            btn.style.background = "#D1FAE5";
+            btn.style.color = "#065F46";
+        }
+
+        async function refreshSidebar() {
+            const nav = document.getElementById('sidebar-nav');
+            const { data: doneRes } = await supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id);
+            const doneSet = new Set(doneRes?.map(p => p.content_node_id));
+
+            nav.innerHTML = curriculumOrder.map(l => {
+                const isCurrent = l.id === lessonId;
+                const isFinished = doneSet.has(l.id);
+                const icon = isFinished ? 'bxs-check-circle' : (l.type === 'quiz' ? 'bx-help-circle' : 'bx-file');
+                
+                return `
+                    <a href="lesson-view.html?id=${l.id}&course=${courseId}" class="nav-item ${isCurrent ? 'active' : ''} ${isFinished ? 'done' : ''}">
+                        <i class='bx ${icon}'></i>
+                        <span style="flex:1">${l.title}</span>
+                    </a>
+                `;
+            }).join('');
+
+            const percent = Math.round((doneSet.size / curriculumOrder.length) * 100);
+            document.getElementById('progress-text').innerText = `${percent}% DONE`;
+        }
+
+        function setupNav() {
+            const idx = curriculumOrder.findIndex(l => l.id === lessonId);
+            const prevBtn = document.getElementById('nav-prev');
+            const nextBtn = document.getElementById('nav-next');
+
+            if (idx > 0) prevBtn.href = `lesson-view.html?id=${curriculumOrder[idx - 1].id}&course=${courseId}`;
+            else prevBtn.style.visibility = 'hidden';
+
+            if (idx < curriculumOrder.length - 1) nextBtn.href = `lesson-view.html?id=${curriculumOrder[idx + 1].id}&course=${courseId}`;
+            else {
+                nextBtn.innerText = "Exit Course";
+                nextBtn.href = `view-course.html?id=${courseId}`;
+            }
+        }
+
+        async function syncLastAccessed() {
+            await supabaseClient.from('enrollments').update({ last_accessed_node_id: lessonId }).eq('user_id', currentUser.id).eq('course_id', courseId);
         }
 
         init();
