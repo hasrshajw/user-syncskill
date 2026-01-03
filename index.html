@@ -158,7 +158,7 @@
         if (session) {
             // If logged in, go to dashboard
             if (session.user.email === ADMIN_EMAIL) {
-                window.location.href = 'manage-courses.html';
+                window.location.href = 'student-dashboard.html';
             } else {
                 window.location.href = 'student-dashboard.html';
             }
@@ -196,7 +196,7 @@
             msg.className = 'msg error';
             msg.style.display = 'block';
         } else {
-            if (email === ADMIN_EMAIL) window.location.href = 'manage-courses.html';
+            if (email === ADMIN_EMAIL) window.location.href = 'student-dashboard.html';
             else window.location.href = 'student-dashboard.html';
         }
     }
