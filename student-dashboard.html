@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
         const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
@@ -132,28 +132,33 @@
             currentUser = session.user;
 
             await updateDailyActivity(); 
-            await loadEnrollments(); // This sets the active course if none is selected
+            await loadEnrollments(); 
+            
             if(activeCourseId) {
                 await refreshDashboardData();
             }
         }
 
         async function loadEnrollments() {
-            const { data: enrollments } = await supabaseClient
+            const { data: enrollments, error } = await supabaseClient
                 .from('enrollments')
                 .select('course_id, courses(name)')
                 .eq('user_id', currentUser.id);
+
+            if (error) return console.error("Enrollment Error:", error);
 
             const dropdown = document.getElementById('enrolled-list-dropdown');
             
             if (!enrollments || enrollments.length === 0) {
                 document.getElementById('current-course-name').innerText = "No Courses";
+                document.getElementById('course-syllabus').innerText = "Please enroll in a course first.";
                 return;
             }
 
-            // If no active course in storage, or user is no longer enrolled in it, pick the first one
+            // Set active course if none exists
             if (!activeCourseId || !enrollments.find(e => e.course_id === activeCourseId)) {
-                setActiveCourse(enrollments[0].course_id, enrollments[0].courses.name);
+                activeCourseId = enrollments[0].course_id;
+                localStorage.setItem('active_course_id', activeCourseId);
             }
 
             dropdown.innerHTML = enrollments.map(e => `
@@ -164,18 +169,16 @@
                 </div>
             `).join('');
 
-            // Set the label in navbar
             const current = enrollments.find(e => e.course_id === activeCourseId);
             if(current) document.getElementById('current-course-name').innerText = current.courses.name;
         }
 
-        function setActiveCourse(id, name) {
+        async function setActiveCourse(id, name) {
             localStorage.setItem('active_course_id', id);
             activeCourseId = id;
             document.getElementById('course-dropdown').classList.remove('active');
-            // Refresh everything
-            loadEnrollments();
-            refreshDashboardData();
+            await loadEnrollments();
+            await refreshDashboardData();
         }
 
         async function refreshDashboardData() {
@@ -185,9 +188,15 @@
         }
 
         async function loadProfile() {
-            const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .maybeSingle(); // maybeSingle avoids 406 if row is missing
+
+            if (error) console.error("Profile Error:", error);
             if (profile) {
-                document.getElementById('user-name').innerText = profile.full_name;
+                document.getElementById('user-name').innerText = profile.full_name || "Student";
                 document.getElementById('user-points').innerText = `${profile.total_points || 0} XP`;
                 document.getElementById('user-avatar').src = profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.full_name}`;
                 document.getElementById('streak-total').innerText = profile.current_streak || 0;
@@ -195,13 +204,12 @@
         }
 
         async function loadCourseContext() {
-            // 1. Get the last lesson for THIS specific course
-            const { data: enrollment } = await supabaseClient
+            const { data: enrollment, error } = await supabaseClient
                 .from('enrollments')
                 .select('*, courses(name), last_accessed_node_id')
                 .eq('user_id', currentUser.id)
                 .eq('course_id', activeCourseId)
-                .single();
+                .maybeSingle();
 
             if (enrollment) {
                 document.getElementById('course-name-display').innerText = enrollment.courses.name;
@@ -211,12 +219,12 @@
                         .from('lessons')
                         .select('title')
                         .eq('id', enrollment.last_accessed_node_id)
-                        .single();
+                        .maybeSingle();
                     
                     if (lesson) {
                         document.getElementById('lesson-title').innerText = lesson.title;
                         document.getElementById('continue-link').style.display = 'inline-block';
-                        document.getElementById('continue-link').href = `view-course.html?courseId=${activeCourseId}&lessonId=${enrollment.last_accessed_node_id}`;
+                        document.getElementById('continue-link').href = `lesson-view.html?id=${enrollment.last_accessed_node_id}&course=${activeCourseId}`;
                     }
                 } else {
                     document.getElementById('lesson-title').innerText = "Ready to start learning?";
@@ -228,13 +236,15 @@
         }
 
         async function loadLeaderboard() {
-            // Load only students enrolled in this specific course
-            const { data: enrollments } = await supabaseClient
+            // Corrected order syntax for joined tables
+            const { data: enrollments, error } = await supabaseClient
                 .from('enrollments')
                 .select('user_id, profiles(full_name, total_points, college_name)')
                 .eq('course_id', activeCourseId)
-                .order('profiles(total_points)', { foreignTable: 'profiles', ascending: false })
+                .order('total_points', { foreignTable: 'profiles', ascending: false })
                 .limit(5);
+
+            if (error) return console.error("Leaderboard Error:", error);
 
             const container = document.getElementById('leaderboard-list');
             if (enrollments) {
@@ -242,10 +252,10 @@
                     <div class="leader-item">
                         <span class="rank">${idx + 1}</span>
                         <div class="leader-info">
-                            <p class="name">${e.profiles.full_name}</p>
-                            <p class="college">${e.profiles.college_name || 'Individual'}</p>
+                            <p class="name">${e.profiles?.full_name || 'Anonymous'}</p>
+                            <p class="college">${e.profiles?.college_name || 'Individual'}</p>
                         </div>
-                        <span class="xp">${e.profiles.total_points} XP</span>
+                        <span class="xp">${e.profiles?.total_points || 0} XP</span>
                     </div>
                 `).join('');
             }
@@ -256,16 +266,18 @@
         }
 
         async function updateDailyActivity() {
-            await supabaseClient.from('daily_activity').upsert({ 
-                user_id: currentUser.id, 
-                activity_date: new Date().toISOString().split('T')[0] 
-            });
+            const today = new Date().toISOString().split('T')[0];
+            // Added onConflict to prevent 409
+            await supabaseClient.from('daily_activity').upsert(
+                { user_id: currentUser.id, activity_date: today },
+                { onConflict: 'user_id,activity_date' }
+            );
         }
 
-        // Close dropdown when clicking outside
         window.onclick = function(event) {
             if (!event.target.closest('.course-switcher-container')) {
-                document.getElementById('course-dropdown').classList.remove('active');
+                const dropdown = document.getElementById('course-dropdown');
+                if (dropdown) dropdown.classList.remove('active');
             }
         }
 
