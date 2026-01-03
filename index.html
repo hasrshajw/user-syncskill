@@ -154,78 +154,91 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let isSocialOnboarding = false;
+    let authUser = null;
 
-    // 1. Initial Load Logic
-    async function checkSession() {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        
-        if (session) {
-            // Check if profile exists
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('id')
-                .eq('id', session.user.id)
-                .maybeSingle();
-
-            if (profile) {
-                // Fully registered -> Dashboard
-                window.location.href = 'student-dashboard.html';
-            } else {
-                // Logged in via Google but NO profile -> Show Onboarding
-                setupOnboarding(session.user);
+    // 1. THE MOST IMPORTANT PART: Listen for Auth State Changes
+    // This catches the #access_token from the URL automatically
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+            if (session) {
+                authUser = session.user;
+                checkProfile(session.user);
             }
+        } else if (event === 'SIGNED_OUT') {
+            showLoginUI();
+        }
+    });
+
+    // 2. Check if the user has a profile record
+    async function checkProfile(user) {
+        const { data: profile, error } = await supabaseClient
+            .from('profiles')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (profile) {
+            // User exists and has filled details -> Dashboard
+            window.location.href = 'student-dashboard.html';
         } else {
-            // Not logged in -> Show Login
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('auth-box').style.display = 'block';
+            // User logged in (Google) but NO profile -> Show Onboarding
+            setupOnboarding(user);
         }
     }
 
-    // 2. Setup Onboarding View
+    // 3. Setup Onboarding View (Collect 10 points)
     function setupOnboarding(user) {
         isSocialOnboarding = true;
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('auth-box').style.display = 'block';
         
-        // UI Changes
-        document.getElementById('main-title').innerText = "Finish your Profile";
-        document.getElementById('sub-title').innerText = "Just a few more details to get started";
+        document.getElementById('main-title').innerText = "Almost there!";
+        document.getElementById('sub-title').innerText = "Complete your profile to access your courses.";
         document.getElementById('social-login-area').style.display = 'none';
         document.getElementById('auth-tabs').style.display = 'none';
         document.getElementById('login-section').classList.remove('active');
         document.getElementById('register-section').classList.add('active');
         
-        // Hide Email/Pass fields (Google user already has them)
         document.getElementById('email-group').style.display = 'none';
         document.getElementById('pass-group').style.display = 'none';
-        document.getElementById('main-auth-btn').innerText = "Complete Setup";
+        document.getElementById('main-auth-btn').innerText = "Start Learning";
         
-        // Pre-fill name from Google
+        // Pre-fill name from Google Account
         document.getElementById('reg-name').value = user.user_metadata?.full_name || "";
     }
 
-    // 3. Auth Actions
-    async function loginWithGoogle() {
-        await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.href }
-        });
+    function showLoginUI() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('auth-box').style.display = 'block';
     }
 
+    // 4. Action: Google Login
+    async function loginWithGoogle() {
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { 
+                // This ensures it comes back to this exact page to finish processing
+                redirectTo: window.location.origin + window.location.pathname 
+            }
+        });
+        if (error) showError(error.message);
+    }
+
+    // 5. Action: Email Login
     async function handleLogin(e) {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-password').value;
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-        if (error) showError(error.message); else checkSession();
+        if (error) showError(error.message);
     }
 
+    // 6. Action: Save Profile (Unified for Google & Email)
     async function handleAuthAction(e) {
         e.preventDefault();
-        const { data: { user } } = await supabaseClient.auth.getUser();
-
+        
         const profileData = {
-            id: user.id,
+            id: authUser.id,
             full_name: document.getElementById('reg-name').value,
             mobile_number: document.getElementById('reg-phone').value,
             age: parseInt(document.getElementById('reg-age').value),
@@ -233,22 +246,33 @@
             college_name: document.getElementById('reg-college').value,
             degree: document.getElementById('reg-degree').value,
             year_of_study: document.getElementById('reg-year').value,
-            city: "N/A" // Default or add a field
+            city: "N/A",
+            current_streak: 0,
+            total_points: 0
         };
 
         if (isSocialOnboarding) {
-            // Save details for Google user
+            // Just insert the profile for the Google User
             const { error } = await supabaseClient.from('profiles').insert([profileData]);
-            if (error) showError(error.message); else window.location.href = 'student-dashboard.html';
+            if (error) showError(error.message); 
+            else window.location.href = 'student-dashboard.html';
         } else {
-            // Standard Email Registration
+            // Standard Email Registration (Sign up + metadata)
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-pass').value;
+            
             const { data, error } = await supabaseClient.auth.signUp({ 
-                email, password, options: { data: profileData } 
+                email, 
+                password, 
+                options: { data: profileData } 
             });
-            if (error) showError(error.message); 
-            else alert("Registration Successful! Please Login.");
+
+            if (error) {
+                showError(error.message);
+            } else {
+                alert("Account created! You can now log in.");
+                location.reload();
+            }
         }
     }
 
@@ -265,8 +289,6 @@
         box.className = 'msg error';
         box.style.display = 'block';
     }
-
-    checkSession();
 </script>
 </body>
 </html>
