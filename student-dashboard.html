@@ -278,40 +278,77 @@
     }
 
 async function fetchLeaderboard() {
-    const { data: allScores, error } = await supabaseClient
-        .from('course_scores')
-        .select(`user_id, points, profiles(full_name, college_name, email)`)
-        .eq('course_id', activeCourseId)
-        .order('points', { ascending: false });
+        // We fetch points and the nested profile data
+        const { data: allScores, error } = await supabaseClient
+            .from('course_scores')
+            .select(`
+                user_id, 
+                points, 
+                profiles (
+                    full_name, 
+                    college_name,
+                    avatar_url
+                )
+            `)
+            .eq('course_id', activeCourseId)
+            .order('points', { ascending: false });
 
-    if (error || !allScores || allScores.length === 0) {
-        updateUI('leaderboard-container', '<p style="color:#999; font-style:italic; padding:10px;">No rankings yet.</p>');
-        return;
+        if (error) {
+            console.error("Leaderboard Error:", error);
+            updateUI('leaderboard-container', '<p style="color:red; font-size:0.7rem;">Error loading rankings.</p>');
+            return;
+        }
+
+        if (!allScores || allScores.length === 0) {
+            updateUI('leaderboard-container', '<p style="color:#999; font-style:italic; padding:10px;">No rankings for this course yet.</p>');
+            return;
+        }
+
+        // 1. Identify Top 3
+        const top3 = allScores.slice(0, 3);
+        
+        // 2. Find Current User's Position in the full list
+        const userIndex = allScores.findIndex(s => s.user_id === currentUser.id);
+        const userInTop3 = userIndex >= 0 && userIndex < 3;
+
+        let leaderboardHtml = '';
+
+        // 3. Render Top 3 members
+        top3.forEach((entry, idx) => {
+            const isMe = entry.user_id === currentUser.id;
+            leaderboardHtml += renderLeaderItem(idx + 1, entry, isMe);
+        });
+
+        // 4. If the logged-in user is NOT in the top 3, show them as a 4th card
+        if (!userInTop3 && userIndex !== -1) {
+            leaderboardHtml += `<div style="height:1px; background:#eee; margin:10px 15px;"></div>`; // Separator line
+            leaderboardHtml += renderLeaderItem(userIndex + 1, allScores[userIndex], true);
+        }
+
+        updateUI('leaderboard-container', leaderboardHtml);
     }
 
-    // Double-check sorting in JS to handle any DB type inconsistencies
-    const sortedData = allScores.sort((a, b) => (b.points || 0) - (a.points || 0));
+    function renderLeaderItem(rank, entry, isMe) {
+        // Fallback for names: If full_name is null, show "Student"
+        const name = entry.profiles?.full_name || "Anonymous Student";
+        const college = entry.profiles?.college_name || "Individual";
+        const avatar = entry.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${name}`;
 
-    const top3 = sortedData.slice(0, 3);
-    const userIndex = sortedData.findIndex(s => s.user_id === currentUser.id);
-    const userInTop3 = userIndex >= 0 && userIndex < 3;
-
-    let leaderboardHtml = '';
-
-    // Render Top 3
-    top3.forEach((entry, idx) => {
-        const isMe = entry.user_id === currentUser.id;
-        leaderboardHtml += renderLeaderItem(idx + 1, entry, isMe);
-    });
-
-    // If User is below Top 3, show them as the 4th item
-    if (!userInTop3 && userIndex !== -1) {
-        leaderboardHtml += `<div style="height:1px; background:#eee; margin:8px 15px;"></div>`;
-        leaderboardHtml += renderLeaderItem(userIndex + 1, sortedData[userIndex], true);
+        return `
+            <div class="leader-item ${isMe ? 'user-highlight' : ''}">
+                <span class="rank">${rank}</span>
+                <img src="${avatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; background:#eee;">
+                <div class="leader-info">
+                    <p class="leader-name">
+                        ${name} 
+                        ${isMe ? '<span class="you-tag">YOU</span>' : ''}
+                    </p>
+                    <small class="leader-college">${college}</small>
+                </div>
+                <span class="xp-badge">${entry.points || 0} XP</span>
+            </div>
+        `;
     }
-
-    updateUI('leaderboard-container', leaderboardHtml);
-}
 
 // Updated Helper to handle "Email vs Name" display nicely
 function renderLeaderItem(rank, entry, isMe) {
