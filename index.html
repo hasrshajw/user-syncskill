@@ -16,17 +16,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'IBM Plex Sans', sans-serif; background: var(--body-bg); color: var(--text-primary); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
 
-        .auth-container { background: var(--widget-bg); width: 100%; max-width: 500px; padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .auth-container { background: var(--widget-bg); width: 100%; max-width: 500px; padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border-color); display: none; }
         .header { text-align: center; margin-bottom: 2rem; }
         .header img { height: 40px; margin-bottom: 1rem; }
         .header h1 { font-size: 1.5rem; font-weight: 700; }
 
-        /* Tabs */
         .tabs { display: flex; background: #F3F4F6; padding: 5px; border-radius: 12px; margin-bottom: 1.5rem; }
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; color: var(--text-secondary); background: transparent; transition: 0.3s; }
         .tab-btn.active { background: white; color: var(--brand-purple); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
 
-        /* Forms */
         .form-section { display: none; }
         .form-section.active { display: block; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -38,10 +36,8 @@
         .input-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; }
         .input-wrapper input, .input-wrapper select { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--border-color); border-radius: 12px; outline: none; font-size: 0.95rem; }
 
-        /* Buttons */
         .btn-auth { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--brand-purple); color: white; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.3s; margin-top: 10px; }
-        .btn-google { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 12px; background: white; color: var(--text-primary); font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 1.5rem; transition: 0.2s; }
-        .btn-google:hover { background: #f9fafb; border-color: #d1d5db; }
+        .btn-google { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 12px; background: white; color: var(--text-primary); font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 1.5rem; }
         .btn-google img { height: 20px; }
 
         .divider { display: flex; align-items: center; text-align: center; color: #999; margin-bottom: 1.5rem; font-size: 0.8rem; }
@@ -56,17 +52,19 @@
 </head>
 <body>
 
-<div id="loading-screen">Authenticating...</div>
+<div id="loading-screen">
+    <i class='bx bx-loader-alt bx-spin' style="font-size: 3rem; color: var(--brand-purple); margin-bottom: 1rem;"></i>
+    <p>Authenticating...</p>
+</div>
 
-<div class="auth-container" id="auth-box" style="display: none;">
+<div class="auth-container" id="auth-box">
     <div class="header">
         <img src="https://ihtnas.com/assets/ihtnas-nav.png" alt="Logo">
         <h1 id="main-title">Student Portal</h1>
         <p id="sub-title" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px;">Join the academy and start coding</p>
     </div>
 
-    <!-- Google Login Button (Hidden during onboarding) -->
-    <div id="social-login-area">
+    <div id="social-area">
         <button class="btn-google" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" alt="Google">
             Continue with Google
@@ -81,7 +79,7 @@
 
     <div id="status-msg" class="msg"></div>
 
-    <!-- 1. Login Form -->
+    <!-- Login -->
     <div id="login-section" class="form-section active">
         <form onsubmit="handleLogin(event)">
             <div class="input-group">
@@ -96,15 +94,15 @@
         </form>
     </div>
 
-    <!-- 2. Registration/Onboarding Form -->
+    <!-- Registration / Onboarding -->
     <div id="register-section" class="form-section">
-        <form onsubmit="handleAuthAction(event)">
+        <form onsubmit="handleFinalSubmit(event)">
             <div class="form-grid">
                 <div class="input-group full-width">
                     <label>Full Name</label>
                     <div class="input-wrapper"><i class='bx bx-user'></i><input type="text" id="reg-name" required></div>
                 </div>
-                <div class="input-group" id="email-group">
+                <div class="input-group" id="email-row">
                     <label>Email</label>
                     <div class="input-wrapper"><i class='bx bx-envelope'></i><input type="email" id="reg-email"></div>
                 </div>
@@ -137,12 +135,12 @@
                     <label>Current Year</label>
                     <div class="input-wrapper"><i class='bx bx-time'></i><input type="text" id="reg-year" placeholder="3rd Year" required></div>
                 </div>
-                <div class="input-group full-width" id="pass-group">
+                <div class="input-group full-width" id="pass-row">
                     <label>Password</label>
                     <div class="input-wrapper"><i class='bx bx-lock-open-alt'></i><input type="password" id="reg-pass"></div>
                 </div>
             </div>
-            <button type="submit" class="btn-auth" id="main-auth-btn">Create Account</button>
+            <button type="submit" class="btn-auth" id="reg-btn">Create Account</button>
         </form>
     </div>
 </div>
@@ -153,24 +151,20 @@
     const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let isSocialOnboarding = false;
-    let authUser = null;
+    let isOnboardingMode = false;
+    let loggedInUser = null;
 
-    // 1. THE MOST IMPORTANT PART: Listen for Auth State Changes
-    // This catches the #access_token from the URL automatically
+    // 1. Initial Logic
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-            if (session) {
-                authUser = session.user;
-                checkProfile(session.user);
-            }
-        } else if (event === 'SIGNED_OUT') {
-            showLoginUI();
+        if (session) {
+            loggedInUser = session.user;
+            await checkProfileStatus(session.user);
+        } else {
+            hideLoadingShowLogin();
         }
     });
 
-    // 2. Check if the user has a profile record
-    async function checkProfile(user) {
+    async function checkProfileStatus(user) {
         const { data: profile, error } = await supabaseClient
             .from('profiles')
             .select('id')
@@ -178,67 +172,58 @@
             .maybeSingle();
 
         if (profile) {
-            // User exists and has filled details -> Dashboard
             window.location.href = 'student-dashboard.html';
         } else {
-            // User logged in (Google) but NO profile -> Show Onboarding
-            setupOnboarding(user);
+            startOnboarding(user);
         }
     }
 
-    // 3. Setup Onboarding View (Collect 10 points)
-    function setupOnboarding(user) {
-        isSocialOnboarding = true;
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('auth-box').style.display = 'block';
+    function startOnboarding(user) {
+        isOnboardingMode = true;
+        hideLoadingShowLogin();
         
-        document.getElementById('main-title').innerText = "Almost there!";
-        document.getElementById('sub-title').innerText = "Complete your profile to access your courses.";
-        document.getElementById('social-login-area').style.display = 'none';
+        // Transform UI to "Finish Setup"
+        document.getElementById('main-title').innerText = "Complete Your Profile";
+        document.getElementById('sub-title').innerText = "Tell us a bit more about you to get started.";
+        document.getElementById('social-area').style.display = 'none';
         document.getElementById('auth-tabs').style.display = 'none';
         document.getElementById('login-section').classList.remove('active');
         document.getElementById('register-section').classList.add('active');
         
-        document.getElementById('email-group').style.display = 'none';
-        document.getElementById('pass-group').style.display = 'none';
-        document.getElementById('main-auth-btn').innerText = "Start Learning";
+        // Hide private credentials
+        document.getElementById('email-row').style.display = 'none';
+        document.getElementById('pass-row').style.display = 'none';
+        document.getElementById('reg-btn').innerText = "Complete Registration";
         
-        // Pre-fill name from Google Account
         document.getElementById('reg-name').value = user.user_metadata?.full_name || "";
     }
 
-    function showLoginUI() {
+    function hideLoadingShowLogin() {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('auth-box').style.display = 'block';
     }
 
-    // 4. Action: Google Login
+    // 2. Auth Actions
     async function loginWithGoogle() {
-        const { error } = await supabaseClient.auth.signInWithOAuth({
+        await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
-            options: { 
-                // This ensures it comes back to this exact page to finish processing
-                redirectTo: window.location.origin + window.location.pathname 
-            }
+            options: { redirectTo: window.location.origin + window.location.pathname }
         });
-        if (error) showError(error.message);
     }
 
-    // 5. Action: Email Login
     async function handleLogin(e) {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-password').value;
         const { error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-        if (error) showError(error.message);
+        if (error) alert(error.message);
     }
 
-    // 6. Action: Save Profile (Unified for Google & Email)
-    async function handleAuthAction(e) {
+    async function handleFinalSubmit(e) {
         e.preventDefault();
         
         const profileData = {
-            id: authUser.id,
+            id: loggedInUser?.id,
             full_name: document.getElementById('reg-name').value,
             mobile_number: document.getElementById('reg-phone').value,
             age: parseInt(document.getElementById('reg-age').value),
@@ -246,33 +231,22 @@
             college_name: document.getElementById('reg-college').value,
             degree: document.getElementById('reg-degree').value,
             year_of_study: document.getElementById('reg-year').value,
-            city: "N/A",
-            current_streak: 0,
-            total_points: 0
+            city: "N/A"
         };
 
-        if (isSocialOnboarding) {
-            // Just insert the profile for the Google User
+        if (isOnboardingMode) {
+            // Case: Google User finishing profile
             const { error } = await supabaseClient.from('profiles').insert([profileData]);
-            if (error) showError(error.message); 
-            else window.location.href = 'student-dashboard.html';
+            if (error) alert(error.message); else window.location.href = 'student-dashboard.html';
         } else {
-            // Standard Email Registration (Sign up + metadata)
+            // Case: New Email user
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-pass').value;
-            
-            const { data, error } = await supabaseClient.auth.signUp({ 
-                email, 
-                password, 
-                options: { data: profileData } 
+            const { error } = await supabaseClient.auth.signUp({ 
+                email, password, options: { data: profileData } 
             });
-
-            if (error) {
-                showError(error.message);
-            } else {
-                alert("Account created! You can now log in.");
-                location.reload();
-            }
+            if (error) alert(error.message); 
+            else alert("Account created! Please check your email or log in.");
         }
     }
 
@@ -281,13 +255,6 @@
         document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
         document.getElementById('tab-' + type).classList.add('active');
         document.getElementById(type + '-section').classList.add('active');
-    }
-
-    function showError(msg) {
-        const box = document.getElementById('status-msg');
-        box.innerText = msg;
-        box.className = 'msg error';
-        box.style.display = 'block';
     }
 </script>
 </body>
