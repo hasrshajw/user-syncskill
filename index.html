@@ -54,7 +54,7 @@
 
 <div id="loading-screen">
     <i class='bx bx-loader-alt bx-spin' style="font-size: 3rem; color: var(--brand-purple); margin-bottom: 1rem;"></i>
-    <p>Authenticating...</p>
+    <p id="loading-text">Authenticating...</p>
 </div>
 
 <div class="auth-container" id="auth-box">
@@ -79,7 +79,6 @@
 
     <div id="status-msg" class="msg"></div>
 
-    <!-- Login -->
     <div id="login-section" class="form-section active">
         <form onsubmit="handleLogin(event)">
             <div class="input-group">
@@ -94,7 +93,6 @@
         </form>
     </div>
 
-    <!-- Registration / Onboarding -->
     <div id="register-section" class="form-section">
         <form onsubmit="handleFinalSubmit(event)">
             <div class="form-grid">
@@ -147,67 +145,86 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+    // 1. Setup Supabase with a custom variable name to avoid conflicts
     const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
     const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let isOnboardingMode = false;
-    let loggedInUser = null;
+    let onboardingMode = false;
+    let authUser = null;
 
-    // 1. Initial Logic
+    // 2. The brain of the page: Auth State Listener
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        console.log("Auth Event:", event);
+        
         if (session) {
-            loggedInUser = session.user;
-            await checkProfileStatus(session.user);
+            authUser = session.user;
+            // Clean URL hash (removes #access_token from view)
+            if (window.location.hash) {
+                history.replaceState(null, null, window.location.pathname);
+            }
+            await processSession(session.user);
         } else {
-            hideLoadingShowLogin();
+            showLoginView();
         }
     });
 
-    async function checkProfileStatus(user) {
-        const { data: profile, error } = await supabaseClient
-            .from('profiles')
-            .select('id')
-            .eq('id', user.id)
-            .maybeSingle();
+    async function processSession(user) {
+        try {
+            document.getElementById('loading-text').innerText = "Checking Profile...";
+            
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('id')
+                .eq('id', user.id)
+                .maybeSingle();
 
-        if (profile) {
-            window.location.href = 'student-dashboard.html';
-        } else {
-            startOnboarding(user);
+            if (profile) {
+                // All details filled -> Go to Dashboard
+                window.location.href = 'student-dashboard.html';
+            } else {
+                // Logged in but no profile details -> Start Onboarding
+                startOnboarding(user);
+            }
+        } catch (e) {
+            console.error(e);
+            showLoginView();
         }
     }
 
     function startOnboarding(user) {
-        isOnboardingMode = true;
-        hideLoadingShowLogin();
+        onboardingMode = true;
+        showLoginView(); // Removes loading screen
         
-        // Transform UI to "Finish Setup"
-        document.getElementById('main-title').innerText = "Complete Your Profile";
-        document.getElementById('sub-title').innerText = "Tell us a bit more about you to get started.";
+        // Switch UI to "Fill Details" mode
+        document.getElementById('main-title').innerText = "Finish your Profile";
+        document.getElementById('sub-title').innerText = "We need a few more details to get you started.";
         document.getElementById('social-area').style.display = 'none';
         document.getElementById('auth-tabs').style.display = 'none';
         document.getElementById('login-section').classList.remove('active');
         document.getElementById('register-section').classList.add('active');
         
-        // Hide private credentials
+        // Hide sensitive fields
         document.getElementById('email-row').style.display = 'none';
         document.getElementById('pass-row').style.display = 'none';
-        document.getElementById('reg-btn').innerText = "Complete Registration";
+        document.getElementById('reg-btn').innerText = "Complete Setup";
         
+        // Pre-fill name if available from Google
         document.getElementById('reg-name').value = user.user_metadata?.full_name || "";
     }
 
-    function hideLoadingShowLogin() {
+    function showLoginView() {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('auth-box').style.display = 'block';
     }
 
-    // 2. Auth Actions
+    // 3. Button Actions
     async function loginWithGoogle() {
         await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin + window.location.pathname }
+            options: { 
+                redirectTo: window.location.href // Redirects back here to catch the token
+            }
         });
     }
 
@@ -223,7 +240,7 @@
         e.preventDefault();
         
         const profileData = {
-            id: loggedInUser?.id,
+            id: authUser.id,
             full_name: document.getElementById('reg-name').value,
             mobile_number: document.getElementById('reg-phone').value,
             age: parseInt(document.getElementById('reg-age').value),
@@ -234,19 +251,19 @@
             city: "N/A"
         };
 
-        if (isOnboardingMode) {
-            // Case: Google User finishing profile
+        if (onboardingMode) {
+            // Google User finishing setup
             const { error } = await supabaseClient.from('profiles').insert([profileData]);
             if (error) alert(error.message); else window.location.href = 'student-dashboard.html';
         } else {
-            // Case: New Email user
+            // New Email Signup
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-pass').value;
             const { error } = await supabaseClient.auth.signUp({ 
                 email, password, options: { data: profileData } 
             });
             if (error) alert(error.message); 
-            else alert("Account created! Please check your email or log in.");
+            else alert("Account created! Verify your email or log in.");
         }
     }
 
