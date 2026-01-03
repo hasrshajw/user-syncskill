@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Player - Ihtnas</title>
+    <title>Learning Portal - Ihtnas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -11,95 +11,90 @@
         :root {
             --body-bg: #FFFFFF; --sidebar-bg: #F9FAFB; --border-color: #E5E7EB;
             --text-primary: #111827; --text-secondary: #6B7280; --brand-purple: #6D28D9;
-            --brand-purple-light: #F5F3FF; --success: #10B981; --danger: #EF4444; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --success: #10B981; --shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'IBM Plex Sans', sans-serif; color: var(--text-primary); background: var(--body-bg); line-height: 1.6; height: 100vh; overflow: hidden; }
+        body { font-family: 'IBM Plex Sans', sans-serif; color: var(--text-primary); background: var(--body-bg); line-height: 1.6; }
 
-        /* Viewer Layout */
-        .viewer-container { display: grid; grid-template-columns: 1fr 340px; height: 100vh; }
+        /* Layout */
+        .viewer-container { display: grid; grid-template-columns: 1fr 320px; height: 100vh; }
 
         /* Content Area */
-        .content-area { overflow-y: auto; display: flex; flex-direction: column; background: #fff; position: relative; scroll-behavior: smooth; }
-        .content-header { padding: 1rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 10; }
-        .btn-exit { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-secondary); font-weight: 700; transition: 0.2s; }
-        .btn-exit:hover { color: var(--brand-purple); }
+        .content-area { overflow-y: auto; display: flex; flex-direction: column; }
+        .content-header { padding: 1.5rem 3rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 10; }
+        .btn-exit { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-secondary); font-weight: 600; }
 
-        .lesson-body { padding: 3rem 2.5rem; max-width: 850px; margin: 0 auto; width: 100%; flex: 1; }
-        .lesson-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 1.5rem; color: #000; line-height: 1.2; }
-        
-        .html-content { font-size: 1.1rem; color: #374151; }
-        .html-content pre { background: #1e293b; color: #f8fafc; padding: 1.5rem; border-radius: 12px; overflow-x: auto; margin: 1.5rem 0; font-family: monospace; }
+        .lesson-body { padding: 3rem; max-width: 900px; margin: 0 auto; width: 100%; flex: 1; }
+        .lesson-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 2rem; color: #000; }
         .html-content img { max-width: 100%; border-radius: 12px; margin: 1.5rem 0; }
+        .html-content h2, .html-content h3 { margin: 2rem 0 1rem 0; }
 
-        /* Quiz UI & Validation */
-        .quiz-container { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2rem; }
-        .question-card { background: var(--sidebar-bg); padding: 1.5rem; border-radius: 16px; border: 2px solid var(--border-color); transition: all 0.3s ease; }
-        .question-card.wrong { border-color: var(--danger); background: #FFF5F5; animation: shake 0.4s ease-in-out; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        
-        .error-hint { color: var(--danger); font-size: 0.8rem; font-weight: 700; margin-top: 10px; display: flex; align-items: center; gap: 5px; }
+        /* Quiz UI */
+        .quiz-container { display: flex; flex-direction: column; gap: 2rem; }
+        .question-card { background: var(--sidebar-bg); padding: 2rem; border-radius: 16px; border: 1px solid var(--border-color); }
+        .options-grid { display: grid; gap: 10px; margin-top: 1.5rem; }
+        .option-btn { background: white; border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-weight: 500; display: flex; align-items: center; gap: 12px; }
+        .option-btn:hover { border-color: var(--brand-purple); background: var(--brand-purple-light); }
+        .option-btn.selected { border-color: var(--brand-purple); background: #F5F3FF; color: var(--brand-purple); box-shadow: 0 0 0 2px var(--brand-purple); }
 
-        .options-grid { display: grid; gap: 10px; margin-top: 1.25rem; }
-        .option-btn { background: white; border: 1px solid var(--border-color); padding: 14px 18px; border-radius: 12px; text-align: left; cursor: pointer; transition: 0.2s; font-weight: 600; display: flex; align-items: center; gap: 12px; width: 100%; }
-        .option-btn:hover { border-color: var(--brand-purple); }
-        .option-btn.selected { border-color: var(--brand-purple); background: var(--brand-purple-light); color: var(--brand-purple); }
-
-        /* Navigation Footer */
-        .content-footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; background: white; align-items: center; }
-        .btn-nav { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; text-decoration: none; font-size: 0.95rem; }
-        .btn-prev { background: #F3F4F6; color: var(--text-primary); }
+        /* Footer Navigation */
+        .content-footer { padding: 1.5rem 3rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; background: white; }
+        .btn-nav { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; text-decoration: none; }
+        .btn-prev { background: #eee; color: var(--text-primary); }
         .btn-next { background: var(--brand-purple); color: white; }
         .btn-complete { background: var(--success); color: white; }
-        .btn-complete:disabled { background: #D1FAE5; color: #065F46; cursor: not-allowed; opacity: 1; }
 
-        /* Sidebar Navigation */
-        .sidebar { background: var(--sidebar-bg); border-left: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: white; }
-        .sidebar-header h3 { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
-        
-        .nav-list { flex: 1; padding: 1rem; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); margin-bottom: 5px; font-size: 0.9rem; font-weight: 600; transition: 0.2s; border: 1px solid transparent; }
+        /* Sidebar */
+        .sidebar { background: var(--sidebar-bg); border-left: 1px solid var(--border-color); overflow-y: auto; padding: 1.5rem; }
+        .sidebar h3 { font-size: 1rem; margin-bottom: 1.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; text-decoration: none; color: var(--text-primary); margin-bottom: 5px; font-size: 0.9rem; transition: 0.2s; }
         .nav-item:hover { background: #E5E7EB; }
-        .nav-item.active { background: white; border-color: var(--border-color); box-shadow: var(--shadow); color: var(--brand-purple); }
+        .nav-item.active { background: white; box-shadow: var(--shadow); color: var(--brand-purple); font-weight: 700; }
+        .nav-item i { font-size: 1.2rem; }
         .nav-item.done i { color: var(--success); }
 
-        #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        @media (max-width: 1024px) {
+            .viewer-container { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .lesson-body { padding: 1.5rem; }
+            .content-header, .content-footer { padding: 1rem 1.5rem; }
+        }
 
-        @media (max-width: 1024px) { .viewer-container { grid-template-columns: 1fr; } .sidebar { display: none; } }
+        #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">Opening Learning Module...</div>
+    <div id="loading-overlay">Opening Lesson...</div>
 
     <div class="viewer-container">
-        <div class="content-area" id="scroll-target">
+        <!-- Main Content -->
+        <div class="content-area">
             <header class="content-header">
-                <a href="#" id="exit-link" class="btn-exit"><i class='bx bx-arrow-back'></i> Exit Course</a>
-                <div id="progress-percent-label" style="font-weight: 800; color: var(--brand-purple); font-size: 0.85rem;">0% DONE</div>
+                <a href="#" id="exit-btn" class="btn-exit"><i class='bx bx-x' style="font-size: 1.5rem;"></i> Close Player</a>
+                <div id="progress-text" style="font-weight: 700; color: var(--brand-purple);">0% Complete</div>
             </header>
 
             <div class="lesson-body">
-                <h1 class="lesson-title" id="lesson-title-display">Please Wait</h1>
-                <div id="content-html-target" class="html-content">
-                    <!-- Lesson HTML or Quiz Injected here -->
+                <h1 class="lesson-title" id="lesson-title">Loading...</h1>
+                <div id="lesson-main-content" class="html-content">
+                    <!-- HTML text or Quiz Questions go here -->
                 </div>
             </div>
 
             <footer class="content-footer">
-                <a href="#" id="nav-prev" class="btn-nav btn-prev"><i class='bx bx-chevron-left'></i> Previous</a>
-                <button id="nav-complete" class="btn-nav btn-complete" onclick="processCompletion()">Mark as Done <i class='bx bx-check-double'></i></button>
-                <a href="#" id="nav-next" class="btn-nav btn-next">Next Lesson <i class='bx bx-chevron-right'></i></a>
+                <a href="#" id="prev-btn" class="btn-nav btn-prev"><i class='bx bx-chevron-left'></i> Previous</a>
+                <button id="complete-btn" class="btn-nav btn-complete" onclick="markComplete()">Mark as Completed <i class='bx bx-check-double'></i></button>
+                <a href="#" id="next-btn" class="btn-nav btn-next">Next Lesson <i class='bx bx-chevron-right'></i></a>
             </footer>
         </div>
 
+        <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h3>Curriculum</h3>
-                <p id="course-label-sidebar" style="font-weight: 700; color: var(--text-primary); margin-top: 4px;"></p>
+            <h3>Course Content</h3>
+            <div id="course-sidebar-nav">
+                <!-- List of all lessons injected here -->
             </div>
-            <div class="nav-list" id="sidebar-nav"></div>
         </aside>
     </div>
 
@@ -109,97 +104,75 @@
         const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const params = new URLSearchParams(window.location.search);
-        const lessonId = params.get('id');
-        const courseId = params.get('course');
+        const urlParams = new URLSearchParams(window.location.search);
+        const lessonId = urlParams.get('id');
+        const courseId = urlParams.get('course');
 
         let currentUser = null;
-        let lessonData = null;
-        let curriculumList = [];
-        let selectedAnswers = {}; 
+        let currentLesson = null;
+        let allLessons = [];
+        let completedSet = new Set();
 
-        async function init() {
+        async function initViewer() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session || !lessonId || !courseId) { window.location.href = 'student-dashboard.html'; return; }
+            if (!session || !lessonId) { window.location.href = 'student-dashboard.html'; return; }
             currentUser = session.user;
 
-            // 1. Enrollment Security Check
-            const { data: enrolled } = await supabaseClient.from('enrollments').select('id').eq('user_id', currentUser.id).eq('course_id', courseId).maybeSingle();
-            if (!enrolled) { window.location.href = 'student-dashboard.html'; return; }
-
-            await loadPageData();
-            await logSessionVisit();
+            await fetchLessonData();
+            await fetchSidebarNav();
+            await updateLastAccessed();
+            
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        async function loadPageData() {
-            try {
-                // Fetch Scoped Progress, Lesson Details, and Sidebar in parallel
-                // Optimized Fix: Pulling only necessary Nav metadata
-                const [lessonRes, allRes, progressRes] = await Promise.all([
-                    supabaseClient.from('lessons').select('*, courses(name)').eq('id', lessonId).single(),
-                    supabaseClient.from('lessons').select('id, title, type, chapter_index, order_index').eq('course_id', courseId).order('chapter_index', {ascending: true}).order('order_index', {ascending: true}),
-                    supabaseClient.from('progress').select('id').eq('user_id', currentUser.id).eq('content_node_id', lessonId).maybeSingle()
-                ]);
+        async function fetchLessonData() {
+            // Fetch current lesson and progress status
+            const [lessonRes, progressRes] = await Promise.all([
+                supabaseClient.from('lessons').select('*').eq('id', lessonId).single(),
+                supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id).eq('content_node_id', lessonId)
+            ]);
 
-                if (lessonRes.error) throw lessonRes.error;
-                lessonData = lessonRes.data;
-                curriculumList = allRes.data;
+            if (lessonRes.error) return;
+            currentLesson = lessonRes.data;
+            
+            document.getElementById('lesson-title').innerText = currentLesson.title;
+            document.getElementById('exit-btn').href = `view-course.html?id=${currentLesson.course_id}`;
 
-                // Basic UI Setup
-                document.getElementById('lesson-title-display').innerText = lessonData.title;
-                document.getElementById('course-label-sidebar').innerText = lessonData.courses.name;
-                document.getElementById('exit-link').href = `view-course.html?id=${courseId}`;
+            if (progressRes.data?.length > 0) {
+                document.getElementById('complete-btn').style.display = 'none';
+            }
 
-                if (progressRes.data) updateCompletionUI();
-
-                // Render Content
-                const container = document.getElementById('content-html-target');
-                if (lessonData.type === 'lesson') {
-                    container.innerHTML = lessonData.content || '<p>Text module coming soon.</p>';
-                } else {
-                    renderQuizModule(lessonData.payload);
-                }
-
-                await refreshSidebarUI();
-                setupNavigationFlow();
-
-            } catch (err) {
-                console.error(err);
-                window.location.href = `view-course.html?id=${courseId}`;
+            if (currentLesson.type === 'lesson') {
+                document.getElementById('lesson-main-content').innerHTML = currentLesson.content;
+            } else {
+                renderQuiz(currentLesson.payload);
             }
         }
 
-        function renderQuizModule(questions) {
-            const container = document.getElementById('content-html-target');
+        function renderQuiz(questions) {
+            const container = document.getElementById('lesson-main-content');
             if (!questions || questions.length === 0) {
-                container.innerHTML = "<p>Quiz questions are not available.</p>"; return;
+                container.innerHTML = "<p>No questions in this quiz.</p>";
+                return;
             }
-            let html = `<div class="quiz-container">`;
-            questions.forEach((q, qIdx) => {
-                html += `
-                    <div class="question-card" id="q-box-${qIdx}">
-                        <p style="font-weight:700;">${qIdx + 1}. ${q.title}</p>
-                        <div class="options-grid">
-                            ${q.options.map((opt, oIdx) => `
-                                <button class="option-btn" onclick="handleChoice(this, ${qIdx}, ${oIdx})">
-                                    <i class='bx bx-circle'></i> ${opt}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>`;
-            });
-            container.innerHTML = html + `</div>`;
+
+            container.innerHTML = `<div class="quiz-container">` + questions.map((q, qIdx) => `
+                <div class="question-card">
+                    <p style="font-weight: 700; font-size: 1.1rem;">${qIdx + 1}. ${q.title}</p>
+                    <div class="options-grid">
+                        ${q.options.map((opt, oIdx) => `
+                            <button class="option-btn" onclick="selectOption(this, ${qIdx}, ${oIdx})">
+                                <i class='bx bx-circle'></i> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('') + `</div>`;
         }
 
-        function handleChoice(btn, qIdx, oIdx) {
-            selectedAnswers[qIdx] = oIdx;
-            const box = document.getElementById(`q-box-${qIdx}`);
-            box.classList.remove('wrong');
-            const hint = box.querySelector('.error-hint');
-            if(hint) hint.remove();
-
-            box.querySelectorAll('.option-btn').forEach(b => {
+        function selectOption(btn, qIdx, oIdx) {
+            const card = btn.closest('.question-card');
+            card.querySelectorAll('.option-btn').forEach(b => {
                 b.classList.remove('selected');
                 b.querySelector('i').className = 'bx bx-circle';
             });
@@ -207,106 +180,78 @@
             btn.querySelector('i').className = 'bx bxs-check-circle';
         }
 
-        async function processCompletion() {
-            // Logical Fix: Strict Quiz Validation with Auto-Scroll
-            if (lessonData.type === 'quiz') {
-                const questions = lessonData.payload;
-                let mistakes = 0;
-                let firstMistake = null;
+        async function fetchSidebarNav() {
+            // Fetch all lessons for this course to build the sidebar and prev/next
+            const { data: lessons } = await supabaseClient
+                .from('lessons')
+                .select('id, title, type, chapter_index, order_index')
+                .eq('course_id', currentLesson.course_id)
+                .order('chapter_index', { ascending: true })
+                .order('order_index', { ascending: true });
 
-                questions.forEach((q, idx) => {
-                    const card = document.getElementById(`q-box-${idx}`);
-                    // Check for wrong answer OR no answer
-                    if (selectedAnswers[idx] === undefined || selectedAnswers[idx] !== q.correctAnswer) {
-                        mistakes++;
-                        card.classList.add('wrong');
-                        if (!card.querySelector('.error-hint')) {
-                            const h = document.createElement('div');
-                            h.className = 'error-hint';
-                            h.innerHTML = `<i class='bx bx-error-circle'></i> Incorrect choice. Please reconsider.`;
-                            card.appendChild(h);
-                        }
-                        if (!firstMistake) firstMistake = card;
-                    }
-                });
+            const { data: progress } = await supabaseClient
+                .from('progress')
+                .select('content_node_id')
+                .eq('user_id', currentUser.id);
 
-                if (mistakes > 0) {
-                    firstMistake.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    return; // Blocking completion
-                }
-            }
+            progress?.forEach(p => completedSet.add(p.content_node_id));
+            allLessons = lessons;
 
-            // Database Save
-            const btn = document.getElementById('nav-complete');
+            const navContainer = document.getElementById('course-sidebar-nav');
+            navContainer.innerHTML = lessons.map(l => `
+                <a href="lesson-view.html?id=${l.id}&course=${courseId}" class="nav-item ${l.id === lessonId ? 'active' : ''} ${completedSet.has(l.id) ? 'done' : ''}">
+                    <i class='bx ${completedSet.has(l.id) ? 'bxs-check-circle' : (l.type === 'quiz' ? 'bx-help-circle' : 'bx-file')}'></i>
+                    <span>${l.title}</span>
+                </a>
+            `).join('');
+
+            // Setup Prev/Next links
+            const idx = lessons.findIndex(l => l.id === lessonId);
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            if (idx > 0) prevBtn.href = `lesson-view.html?id=${lessons[idx-1].id}&course=${courseId}`;
+            else prevBtn.style.visibility = 'hidden';
+
+            if (idx < lessons.length - 1) nextBtn.href = `lesson-view.html?id=${lessons[idx+1].id}&course=${courseId}`;
+            else nextBtn.style.visibility = 'hidden';
+
+            // Overall progress percent
+            const percent = Math.round((completedSet.size / lessons.length) * 100);
+            document.getElementById('progress-text').innerText = `${percent}% Complete`;
+        }
+
+        async function updateLastAccessed() {
+            await supabaseClient
+                .from('enrollments')
+                .update({ last_accessed_node_id: lessonId })
+                .eq('user_id', currentUser.id)
+                .eq('course_id', currentLesson.course_id);
+        }
+
+        async function markComplete() {
+            const btn = document.getElementById('complete-btn');
             btn.disabled = true;
-            btn.innerText = "Syncing...";
+            btn.innerText = "Saving...";
 
-            const { error } = await supabaseClient
+            // 1. Add to progress table
+            const { error: pError } = await supabaseClient
                 .from('progress')
                 .insert([{ user_id: currentUser.id, content_node_id: lessonId }]);
 
-            if (!error) {
-                // Reactive UI Update (Test Report Fix: No hard reload)
-                updateCompletionUI();
-                await refreshSidebarUI();
+            if (!pError) {
+                // 2. Grant XP Points (Advanced Logic: 10 XP per lesson)
+                await supabaseClient.rpc('increment_user_xp', { amount: 10 });
+                
+                alert("Goal Reached! +10 XP earned.");
+                window.location.reload();
             } else {
                 btn.disabled = false;
-                btn.innerText = "Mark as Done";
+                btn.innerText = "Mark as Completed";
             }
         }
 
-        function updateCompletionUI() {
-            const btn = document.getElementById('nav-complete');
-            btn.innerHTML = "Completed <i class='bx bxs-check-circle'></i>";
-            btn.disabled = true;
-            btn.style.background = "#D1FAE5";
-            btn.style.color = "#065F46";
-        }
-
-        async function refreshSidebarUI() {
-            const nav = document.getElementById('sidebar-nav');
-            // Optimization: Fetch only progress for THIS user
-            const { data: doneRes } = await supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id);
-            const doneSet = new Set(doneRes?.map(p => p.content_node_id));
-
-            nav.innerHTML = curriculumList.map(l => {
-                const isCurrent = l.id === lessonId;
-                const isFinished = doneSet.has(l.id);
-                const icon = isFinished ? 'bxs-check-circle' : (l.type === 'quiz' ? 'bx-help-circle' : 'bx-file');
-                
-                return `
-                    <a href="lesson-view.html?id=${l.id}&course=${courseId}" class="nav-item ${isCurrent ? 'active' : ''} ${isFinished ? 'done' : ''}">
-                        <i class='bx ${icon}'></i>
-                        <span style="flex:1">${l.title}</span>
-                    </a>
-                `;
-            }).join('');
-
-            const percent = curriculumList.length > 0 ? Math.round((doneSet.size / curriculumList.length) * 100) : 0;
-            document.getElementById('progress-percent-label').innerText = `${percent}% DONE`;
-        }
-
-        function setupNavigationFlow() {
-            const idx = curriculumList.findIndex(l => l.id === lessonId);
-            const prev = document.getElementById('nav-prev');
-            const next = document.getElementById('nav-next');
-
-            if (idx > 0) prev.href = `lesson-view.html?id=${curriculumList[idx - 1].id}&course=${courseId}`;
-            else prev.style.visibility = 'hidden';
-
-            if (idx < curriculumList.length - 1) next.href = `lesson-view.html?id=${curriculumList[idx + 1].id}&course=${courseId}`;
-            else {
-                next.innerText = "Course View";
-                next.href = `view-course.html?id=${courseId}`;
-            }
-        }
-
-        async function logSessionVisit() {
-            // Updates "Continue Learning" dashboard card
-            await supabaseClient.from('enrollments').update({ last_accessed_node_id: lessonId }).eq('user_id', currentUser.id).eq('course_id', courseId);
-        }
-
-        init();
+        initViewer();
     </script>
 </body>
 </html>
