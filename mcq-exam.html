@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment - Ihtnas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        :root {
+            --body-bg: #F3F4F6; --widget-bg: #FFFFFF; --border-color: #E5E7EB;
+            --text-primary: #111827; --text-secondary: #6B7280; --brand-purple: #6D28D9;
+            --success: #10B981; --danger: #EF4444; --warning: #F59E0B;
+            --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background-color: var(--body-bg); color: var(--text-primary); line-height: 1.6; }
+
+        /* Header & Timer */
+        .exam-header { 
+            background: var(--widget-bg); padding: 1rem 2rem; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+        .timer-box { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.2rem; color: var(--danger); background: #FEF2F2; padding: 5px 15px; border-radius: 99px; }
+
+        /* Layout */
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; padding-bottom: 5rem; }
+        .exam-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 2rem; text-align: center; }
+
+        /* Question Cards */
+        .question-card { background: white; padding: 2rem; border-radius: 20px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+        .q-text { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; gap: 10px; }
+        .q-num { color: var(--brand-purple); }
+
+        .options-grid { display: grid; gap: 12px; }
+        .option-btn { 
+            background: white; border: 2px solid var(--border-color); padding: 14px 20px; border-radius: 12px;
+            text-align: left; cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .option-btn:hover { border-color: var(--brand-purple); background: #F5F3FF; }
+        .option-btn.selected { border-color: var(--brand-purple); background: #F5F3FF; color: var(--brand-purple); }
+        .option-btn i { font-size: 1.2rem; color: #ccc; }
+        .option-btn.selected i { color: var(--brand-purple); }
+
+        /* Submit Area */
+        .submit-container { text-align: center; margin-top: 3rem; }
+        .btn-submit { background: var(--brand-purple); color: white; padding: 15px 40px; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.4); }
+        .btn-submit:hover { transform: translateY(-2px); background: #5B21B6; }
+
+        /* Result View */
+        .result-card { background: white; padding: 3rem; border-radius: 24px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
+        .result-score { font-size: 4rem; font-weight: 800; color: var(--brand-purple); margin: 1rem 0; }
+        .btn-back { display: inline-block; margin-top: 2rem; text-decoration: none; color: var(--text-secondary); font-weight: 700; }
+
+        #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">Initializing Secure Exam Environment...</div>
+
+    <header class="exam-header">
+        <img src="https://ihtnas.com/assets/ihtnas-nav.png" alt="Logo" style="height: 30px;">
+        <div id="timer" class="timer-box" style="display: none;">
+            <i class='bx bx-time-five'></i>
+            <span id="time-display">00:00</span>
+        </div>
+    </header>
+
+    <main class="container" id="exam-container" style="display: none;">
+        <h1 class="exam-title" id="exam-name">Exam Name</h1>
+        
+        <div id="questions-list">
+            <!-- Questions injected here -->
+        </div>
+
+        <div class="submit-container">
+            <button class="btn-submit" onclick="submitExam()">Submit Assessment</button>
+        </div>
+    </main>
+
+    <!-- Result View -->
+    <div class="container" id="result-view" style="display: none;">
+        <div class="result-card">
+            <i class='bx bxs-trophy' style="font-size: 5rem; color: var(--warning);"></i>
+            <h2 id="result-message">Exam Completed!</h2>
+            <div class="result-score" id="score-display">0/0</div>
+            <p id="xp-earned" style="color: var(--success); font-weight: 700; font-size: 1.2rem;">+0 XP Earned</p>
+            <a href="student-dashboard.html" class="btn-back"><i class='bx bx-left-arrow-alt'></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('id');
+
+        let currentUser = null;
+        let examData = null;
+        let studentAnswers = {};
+        let timerInterval = null;
+
+        async function initExam() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session || !examId) { window.location.href = 'student-dashboard.html'; return; }
+            currentUser = session.user;
+
+            // 1. Check if student already took this exam
+            const { data: existing } = await supabaseClient
+                .from('exam_submissions')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('exam_id', examId)
+                .maybeSingle();
+
+            if (existing) {
+                showResults(existing.score, existing.total_points, false);
+                document.getElementById('loading-overlay').style.display = 'none';
+                return;
+            }
+
+            // 2. Fetch Exam Data
+            const { data: exam, error } = await supabaseClient
+                .from('exams')
+                .select('*')
+                .eq('id', examId)
+                .single();
+
+            if (error || !exam) { alert("Exam not found or locked."); window.location.href='student-dashboard.html'; return; }
+            
+            examData = exam;
+            renderExam();
+            startTimer(exam.duration);
+            
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function renderExam() {
+            document.getElementById('exam-name').innerText = examData.name;
+            const container = document.getElementById('questions-list');
+            
+            container.innerHTML = examData.payload.map((q, qIdx) => `
+                <div class="question-card" id="q-card-${qIdx}">
+                    <div class="q-text">
+                        <span class="q-num">Q${qIdx + 1}.</span>
+                        <span>${q.title}</span>
+                    </div>
+                    <div class="options-grid">
+                        ${q.options.map((opt, oIdx) => `
+                            <button class="option-btn" onclick="selectOption(${qIdx}, ${oIdx})">
+                                <i class='bx bx-circle'></i> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('exam-container').style.display = 'block';
+            document.getElementById('timer').style.display = 'flex';
+        }
+
+        function selectOption(qIdx, oIdx) {
+            studentAnswers[qIdx] = oIdx;
+            const card = document.getElementById(`q-card-${qIdx}`);
+            card.querySelectorAll('.option-btn').forEach((btn, idx) => {
+                if (idx === oIdx) {
+                    btn.classList.add('selected');
+                    btn.querySelector('i').className = 'bx bxs-check-circle';
+                } else {
+                    btn.classList.remove('selected');
+                    btn.querySelector('i').className = 'bx bx-circle';
+                }
+            });
+        }
+
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            const display = document.getElementById('time-display');
+
+            timerInterval = setInterval(() => {
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time is up! Your exam is being submitted automatically.");
+                    submitExam();
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        async function submitExam() {
+            clearInterval(timerInterval);
+            document.getElementById('loading-overlay').style.display = 'flex';
+            document.getElementById('loading-overlay').innerText = "Calculating Grade...";
+
+            let score = 0;
+            const total = examData.payload.length;
+
+            examData.payload.forEach((q, idx) => {
+                if (studentAnswers[idx] === q.correctAnswer) {
+                    score++;
+                }
+            });
+
+            // 1. Save to database
+            const { error } = await supabaseClient
+                .from('exam_submissions')
+                .insert([{
+                    user_id: currentUser.id,
+                    exam_id: examId,
+                    score: score,
+                    total_points: total
+                }]);
+
+            if (error) {
+                alert("Submission error: " + error.message);
+                return;
+            }
+
+            // 2. Grant XP (50 XP for completing a formal exam)
+            await supabaseClient.rpc('increment_user_xp', { amount: 50 });
+
+            showResults(score, total, true);
+        }
+
+        function showResults(score, total, isNew) {
+            document.getElementById('exam-container').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('loading-overlay').style.display = 'none';
+
+            document.getElementById('score-display').innerText = `${score} / ${total}`;
+            document.getElementById('result-message').innerText = isNew ? "Assessment Submitted!" : "You already took this exam";
+            document.getElementById('xp-earned').innerText = isNew ? "+50 XP Earned" : "Previous result shown";
+            
+            document.getElementById('result-view').style.display = 'block';
+        }
+
+        initExam();
+    </script>
+</body>
+</html>
