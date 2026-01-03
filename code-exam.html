@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Assessment - Ihtnas</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>ProCoder IDE - Assessment</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
@@ -25,19 +24,19 @@
         .panel { background: var(--surface-dark); border-right: 1px solid var(--border-color); overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; }
         .problem-info h2 { color: #fff; margin-bottom: 1rem; font-size: 1.2rem; }
         .problem-info p { line-height: 1.6; color: var(--text-secondary); margin-bottom: 1rem; }
-        .test-case-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-top: 10px; font-family: 'Fira Code', monospace; font-size: 0.8rem; border: 1px solid var(--border-color); }
+        .test-case-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-top: 10px; font-family: 'Fira Code', monospace; font-size: 0.8rem; border: 1px solid var(--border-color); white-space: pre-wrap; }
 
         /* Editor */
         #editor-container { flex: 1; background: #000; }
 
         /* Right Panel: Navigator & Results */
         .right-panel { border-left: 1px solid var(--border-color); border-right: none; }
-        .nav-item { padding: 12px; border-radius: 8px; background: #21262d; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .nav-item { padding: 12px; border-radius: 8px; background: #21262d; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; font-weight: 600; }
         .nav-item:hover { border-color: var(--brand-purple); }
         .nav-item.active { background: var(--brand-purple); color: white; }
-        .nav-item.submitted { opacity: 0.6; pointer-events: none; border-color: var(--success); }
+        .nav-item.submitted { opacity: 0.6; cursor: default; border-color: var(--success); }
 
-        /* Result View (MCQ Style) */
+        /* Result View (MCQ Style Score Card) */
         #result-view { position: fixed; inset: 0; background: var(--bg-dark); z-index: 1000; display: none; align-items: center; justify-content: center; }
         .result-card { background: var(--surface-dark); padding: 4rem 2rem; border-radius: 24px; text-align: center; max-width: 450px; width: 90%; border: 1px solid var(--border-color); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .score-big { font-size: 5rem; font-weight: 800; color: var(--brand-purple); margin: 1rem 0; }
@@ -51,19 +50,28 @@
         .timer { font-family: 'Fira Code', monospace; font-weight: 700; color: var(--danger); background: rgba(218, 54, 51, 0.1); padding: 5px 12px; border-radius: 6px; }
         
         #loading-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9998; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">Booting ProCoder IDE...</div>
+    <div id="loading-overlay">Booting ProCoder Environment...</div>
 
-    <!-- Final Result Overlay -->
+    <!-- Fullscreen Proctoring -->
+    <div id="proctor-overlay" class="overlay">
+        <i class='bx bx-fullscreen' style="font-size: 4rem; color: var(--brand-purple);"></i>
+        <h2 style="margin: 1.5rem 0;">Fullscreen Required</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">To protect exam integrity, you must be in Fullscreen Mode.</p>
+        <button class="btn btn-submit" onclick="enterFullscreen()">Enter Fullscreen & Resume</button>
+    </div>
+
+    <!-- Final Result Score Card -->
     <div id="result-view">
         <div class="result-card">
-            <i class='bx bxs-award' style="font-size: 5rem; color: var(--warning);"></i>
+            <i class='bx bxs-check-shield' style="font-size: 5rem; color: var(--success);"></i>
             <h2 id="result-title">Assignment Complete</h2>
             <div class="score-big" id="final-score-display">0 / 0</div>
-            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Your coding assessment has been graded and saved.</p>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Assessment points have been synced to your profile.</p>
             <button class="btn btn-submit" style="width: 100%; justify-content: center;" onclick="window.location.href='student-dashboard.html'">Back to Dashboard</button>
         </div>
     </div>
@@ -72,39 +80,41 @@
         <header class="ide-header">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <img src="https://ihtnas.com/assets/ihtnas-nav.png" alt="Logo" style="height: 25px;">
-                <span id="assign-name" style="font-weight: 700; font-size: 0.9rem;">Assessment</span>
+                <span id="assign-name" style="font-weight: 700; font-size: 0.9rem;">Assessment IDE</span>
             </div>
             
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div class="timer" id="timer">00:00</div>
-                <button class="btn btn-run" onclick="runCode()"><i class='bx bx-play'></i> Run</button>
+                <button class="btn btn-run" onclick="runCode()"><i class='bx bx-play'></i> Run Sample</button>
                 <button class="btn btn-submit" id="submit-btn" onclick="submitCurrentProblem()"><i class='bx bx-cloud-upload'></i> Submit Problem</button>
             </div>
         </header>
 
         <main class="main-layout">
-            <!-- Left: Instructions -->
+            <!-- Problem Description -->
             <div class="panel problem-info">
-                <h2 id="p-title">Select Problem</h2>
-                <div id="p-statement">Click a problem on the right to begin.</div>
-                <h4 style="margin-top: 2rem; font-size: 0.8rem; color: var(--warning);">SAMPLE TEST CASE</h4>
-                <div id="p-example" class="test-case-box">No data.</div>
+                <h2 id="p-title">Loading Task...</h2>
+                <div id="p-statement">Please wait for the environment to sync.</div>
+                <h4 style="margin-top: 2rem; font-size: 0.75rem; color: var(--warning); letter-spacing: 1px;">SAMPLE TEST CASE</h4>
+                <div id="p-example" class="test-case-box">--</div>
+                
+                <div style="margin-top: auto; padding-top: 2rem;">
+                    <button class="btn btn-run" style="width: 100%; border: 1px solid var(--danger); color: var(--danger); justify-content: center;" onclick="endAssignment()">Finish & Exit Exam</button>
+                </div>
             </div>
 
-            <!-- Center: Monaco Editor -->
+            <!-- Monaco Editor Container -->
             <div id="editor-container"></div>
 
-            <!-- Right: Problem Nav & Results -->
+            <!-- Side Nav & Results -->
             <div class="panel right-panel">
-                <h3 style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 1rem; letter-spacing: 1px;">PROBLEM SET</h3>
-                <div id="problem-list"></div>
+                <h3 style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 1rem; letter-spacing: 1.5px;">TASKS</h3>
+                <div id="problem-nav-list"></div>
 
-                <h3 style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 2rem; margin-bottom: 1rem; letter-spacing: 1px;">GRADES / RESULTS</h3>
-                <div id="results-log">
-                    <p style="color: #555; font-style: italic; font-size: 0.8rem;">Click 'Run' to check logic.</p>
+                <h3 style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 2.5rem; margin-bottom: 1rem; letter-spacing: 1.5px;">EXECUTION LOG</h3>
+                <div id="results-log" style="font-size: 0.85rem;">
+                    <p style="color: #555; font-style: italic;">Results will appear here.</p>
                 </div>
-                
-                <button class="btn btn-run" style="margin-top: auto; border: 1px solid var(--danger); color: var(--danger);" onclick="endAssignment()">Finish & Exit</button>
             </div>
         </main>
     </div>
@@ -123,124 +133,125 @@
         let currentUser, assignment, problems = [], activeProblem = null;
         let editor, pyodide, timer;
         let submittedProblemIds = new Set();
+        let violationCount = 0;
 
         async function init() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session || !assignmentId) { window.location.href = 'student-dashboard.html'; return; }
             currentUser = session.user;
 
-            // 1. Fetch Existing Submissions (Check if already done)
+            // 1. Fetch Existing Submissions for THIS assignment
             const { data: existing } = await supabaseClient
                 .from('code_submissions')
                 .select('problem_id, score')
                 .eq('user_id', currentUser.id)
                 .eq('assignment_id', assignmentId);
 
-            // 2. Fetch Data
+            // 2. Fetch Assignment and Problem Data
             const [assignRes, probRes] = await Promise.all([
                 supabaseClient.from('code_assignments').select('*').eq('id', assignmentId).single(),
                 supabaseClient.from('code_problems').select('*').eq('assignment_id', assignmentId).order('id', {ascending: true})
             ]);
 
+            if (assignRes.error || !probRes.data) { window.location.href = 'student-dashboard.html'; return; }
             assignment = assignRes.data;
             problems = probRes.data;
 
-            // 3. If user has already submitted ALL problems, show final score card immediately
+            // 3. Score Card Guard: If all problems are submitted, show results immediately
             if (existing && existing.length >= problems.length && problems.length > 0) {
-                const totalEarned = existing.reduce((acc, curr) => acc + curr.score, 0);
-                const totalPossible = problems.reduce((acc, curr) => acc + curr.points, 0);
-                showFinalResults(totalEarned, totalPossible);
+                const earned = existing.reduce((a, b) => a + (b.score || 0), 0);
+                const total = problems.reduce((a, b) => a + b.points, 0);
+                showFinalScore(earned, total);
                 document.getElementById('loading-overlay').style.display = 'none';
                 return;
             }
 
-            // Mark which problems are already done
+            // Sync submitted problem state
             existing?.forEach(s => submittedProblemIds.add(s.problem_id));
 
-            await initIDE();
-            renderProblemList();
+            await bootIDE();
+            renderNav();
             
-            // Switch to first un-submitted problem
-            const nextProb = problems.find(p => !submittedProblemIds.has(p.id)) || problems[0];
-            switchProblem(nextProb.id);
+            // Auto-load first unsubmitted task
+            const next = problems.find(p => !submittedProblemIds.has(p.id)) || problems[0];
+            loadTask(next.id);
             
-            startCountdown(assignment.duration);
+            startTimer(assignment.duration);
+            setupProctoring();
+
             document.getElementById('assign-name').innerText = assignment.name;
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        async function initIDE() {
-            // Load Monaco
-            await new Promise(res => {
+        async function bootIDE() {
+            await new Promise(resolve => {
                 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' }});
                 require(['vs/editor/editor.main'], () => {
                     editor = monaco.editor.create(document.getElementById('editor-container'), {
-                        theme: 'vs-dark',
-                        fontSize: 16,
-                        fontFamily: 'Fira Code',
-                        automaticLayout: true,
-                        minimap: { enabled: false }
+                        theme: 'vs-dark', fontSize: 16, fontFamily: 'Fira Code', automaticLayout: true, minimap: { enabled: false }
                     });
-                    res();
+                    resolve();
                 });
             });
-            // Load Python if needed
             if (problems.some(p => p.language === 'python')) pyodide = await loadPyodide();
         }
 
-        function renderProblemList() {
-            const list = document.getElementById('problem-list');
+        function renderNav() {
+            const list = document.getElementById('problem-nav-list');
             list.innerHTML = problems.map((p, i) => `
                 <div class="nav-item ${p.id === activeProblem?.id ? 'active' : ''} ${submittedProblemIds.has(p.id) ? 'submitted' : ''}" 
-                     onclick="switchProblem('${p.id}')">
-                    <span>${i + 1}. ${p.title}</span>
-                    ${submittedProblemIds.has(p.id) ? "<i class='bx bxs-check-circle'></i>" : ""}
+                     onclick="loadTask('${p.id}')">
+                    <span>Task ${i + 1}</span>
+                    ${submittedProblemIds.has(p.id) ? "<i class='bx bxs-check-circle' style='color:var(--success)'></i>" : "<i class='bx bx-code'></i>"}
                 </div>
             `).join('');
         }
 
-        function switchProblem(id) {
+        function loadTask(id) {
+            if (activeProblem?.id === id) return;
             activeProblem = problems.find(p => p.id === id);
+            
             document.getElementById('p-title').innerText = activeProblem.title;
             document.getElementById('p-statement').innerHTML = activeProblem.statement;
             
-            const ex = activeProblem.test_cases?.[0];
-            document.getElementById('p-example').innerText = ex ? `Input: ${ex.input}\nOutput: ${ex.output}` : "None";
+            const tc = activeProblem.test_cases?.[0];
+            document.getElementById('p-example').innerText = tc ? `Input: ${tc.input}\nOutput: ${tc.output}` : "N/A";
 
             const lang = activeProblem.language === 'python' ? 'python' : 'javascript';
             monaco.editor.setModelLanguage(editor.getModel(), lang);
             editor.setValue(activeProblem.starter_code);
             
-            const subBtn = document.getElementById('submit-btn');
-            subBtn.disabled = submittedProblemIds.has(id);
-            subBtn.innerHTML = subBtn.disabled ? "Already Submitted" : "<i class='bx bx-cloud-upload'></i> Submit Problem";
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = submittedProblemIds.has(id);
+            btn.innerHTML = btn.disabled ? "Locked (Submitted)" : "<i class='bx bx-cloud-upload'></i> Submit Problem";
 
-            renderProblemList();
+            renderNav();
         }
 
         async function runCode() {
-            const results = await executeTests(activeProblem.test_cases.slice(0, 1)); // Run only sample
+            const log = document.getElementById('results-log');
+            log.innerHTML = "<p style='color:var(--warning)'>Testing sample case...</p>";
+            const results = await processTests(activeProblem.test_cases.slice(0, 1));
             const r = results[0];
-            document.getElementById('results-log').innerHTML = `
-                <div style="padding: 10px; border-radius: 8px; background: ${r.passed ? 'rgba(35,134,54,0.1)' : 'rgba(218,54,51,0.1)'}">
-                    <p><strong>Sample Test:</strong> ${r.passed ? 'PASSED' : 'FAILED'}</p>
-                    <small>Input: ${r.input} <br> Expected: ${r.expected} <br> Got: ${r.actual}</small>
-                </div>
-            `;
+            log.innerHTML = `
+                <div style="padding:10px; border-radius:8px; border:1px solid ${r.passed ? 'var(--success)' : 'var(--danger)'}">
+                    <p><strong>Sample Result:</strong> ${r.passed ? 'PASS' : 'FAIL'}</p>
+                    <div style="font-size:0.75rem; margin-top:5px; opacity:0.8">Expected: ${r.expected} <br> Received: ${r.actual}</div>
+                </div>`;
         }
 
         async function submitCurrentProblem() {
-            if(!confirm("Submit logic? This problem will be locked after submission.")) return;
+            if (!confirm("Final Submission? You cannot edit this task again.")) return;
             
             document.getElementById('loading-overlay').style.display = 'flex';
-            document.getElementById('loading-overlay').innerText = "Running Secure Grading...";
+            document.getElementById('loading-overlay').innerText = "Processing Test Suite...";
 
             const code = editor.getValue();
-            const results = await executeTests(activeProblem.test_cases);
-            const passed = results.filter(r => r.passed).length;
+            const tests = await processTests(activeProblem.test_cases);
+            const passed = tests.filter(t => t.passed).length;
             
-            // LOGIC: If no tests passed, score is 0.
-            const earned = passed > 0 ? Math.round((passed / results.length) * activeProblem.points) : 0;
+            // Logic: Score is calculated proportionally. If 0 passed, score is 0.
+            const earned = passed > 0 ? Math.round((passed / tests.length) * activeProblem.points) : 0;
 
             const { error } = await supabaseClient
                 .from('code_submissions')
@@ -248,26 +259,25 @@
                     user_id: currentUser.id,
                     assignment_id: assignmentId,
                     problem_id: activeProblem.id,
-                    score: earned, // Saves 0 if none passed
+                    score: earned,
                     code_body: code,
                     passed_cases: passed,
-                    total_cases: results.length
+                    total_cases: tests.length
                 }]);
 
             document.getElementById('loading-overlay').style.display = 'none';
 
             if (!error) {
                 submittedProblemIds.add(activeProblem.id);
-                alert(`Problem Submitted! Score: ${earned} / ${activeProblem.points}`);
+                alert(`Task graded: ${earned} / ${activeProblem.points}`);
                 
-                // Auto-switch to next
-                const next = problems.find(p => !submittedProblemIds.has(p.id));
-                if (next) switchProblem(next.id);
+                const nextTask = problems.find(p => !submittedProblemIds.has(p.id));
+                if (nextTask) loadTask(nextTask.id);
                 else endAssignment();
             }
         }
 
-        async function executeTests(cases) {
+        async function processTests(cases) {
             const code = editor.getValue();
             const results = [];
             for (let tc of cases) {
@@ -282,39 +292,54 @@
                         actual = fn(JSON.parse(tc.input));
                         passed = JSON.stringify(actual) == JSON.stringify(JSON.parse(tc.output));
                     }
-                } catch (e) { actual = e.message; }
+                } catch (e) { actual = "Error: " + e.message; }
                 results.push({ input: tc.input, expected: tc.output, actual, passed });
             }
             return results;
         }
 
-        function startCountdown(sec) {
-            let left = sec;
+        function startTimer(duration) {
+            let seconds = duration;
             timer = setInterval(() => {
-                const m = Math.floor(left / 60).toString().padStart(2, '0');
-                const s = (left % 60).toString().padStart(2, '0');
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
                 document.getElementById('timer').innerText = `${m}:${s}`;
-                if (left <= 0) { clearInterval(timer); endAssignment(); }
-                left--;
+                if (seconds <= 0) { clearInterval(timer); endAssignment(); }
+                seconds--;
             }, 1000);
+        }
+
+        function setupProctoring() {
+            document.addEventListener("visibilitychange", () => {
+                if (document.hidden) {
+                    violationCount++;
+                    alert(`Security Warning (${violationCount}/3): You must not leave this tab!`);
+                }
+            });
+            window.addEventListener('resize', () => {
+                if (!window.screenTop && !window.screenY) document.getElementById('proctor-overlay').style.display = 'flex';
+            });
+        }
+
+        function enterFullscreen() {
+            document.documentElement.requestFullscreen();
+            document.getElementById('proctor-overlay').style.display = 'none';
         }
 
         async function endAssignment() {
             clearInterval(timer);
-            // Fetch all submissions for final tally
             const { data } = await supabaseClient
                 .from('code_submissions')
                 .select('score')
                 .eq('user_id', currentUser.id)
                 .eq('assignment_id', assignmentId);
 
-            const earned = data?.reduce((a, b) => a + b.score, 0) || 0;
-            const possible = problems.reduce((a, b) => a + b.points, 0);
-            
-            showFinalResults(earned, possible);
+            const totalScore = data?.reduce((a, b) => a + (b.score || 0), 0) || 0;
+            const maxScore = problems.reduce((a, b) => a + b.points, 0);
+            showFinalScore(totalScore, maxScore);
         }
 
-        function showFinalResults(score, total) {
+        function showFinalScore(score, total) {
             document.getElementById('final-score-display').innerText = `${score} / ${total}`;
             document.getElementById('result-view').style.display = 'flex';
         }
