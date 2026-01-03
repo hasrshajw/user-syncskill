@@ -124,7 +124,7 @@
         </aside>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
         const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
@@ -147,46 +147,58 @@
         }
 
         async function fetchData() {
-            // 1. Fetch Course & Profile
-            const [courseRes, profileRes, progressRes, scoresRes] = await Promise.all([
-                supabaseClient.from('courses').select('*').eq('id', courseId).single(),
-                supabaseClient.from('profiles').select('total_points').eq('id', currentUser.id).single(),
-                supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id),
-                supabaseClient.from('exam_submissions').select('*').eq('user_id', currentUser.id)
-            ]);
+            try {
+                // 1. Fetch Course, Profile, Progress, and Scores
+                const [courseRes, profileRes, progressRes, scoresRes] = await Promise.all([
+                    supabaseClient.from('courses').select('*').eq('id', courseId).single(),
+                    supabaseClient.from('profiles').select('total_points').eq('id', currentUser.id).single(),
+                    supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id),
+                    supabaseClient.from('exam_submissions').select('*').eq('user_id', currentUser.id)
+                ]);
 
-            const course = courseRes.data;
-            document.getElementById('course-title-display').innerText = course.name;
-            document.getElementById('user-points-header').innerText = `${profileRes.data.total_points || 0} XP`;
-            
-            progressRes.data?.forEach(p => userProgress.add(p.content_node_id));
-            scoresRes.data?.forEach(s => userScores.set(s.exam_id, s));
+                if (courseRes.error) throw courseRes.error;
 
-            // 2. Fetch Lessons
-            const { data: lessons } = await supabaseClient
-                .from('lessons')
-                .select('*')
-                .eq('course_id', courseId)
-                .order('chapter_index', { ascending: true })
-                .order('order_index', { ascending: true });
+                const course = courseRes.data;
+                document.getElementById('course-title-display').innerText = course.name;
+                document.getElementById('user-points-header').innerText = `${profileRes.data?.total_points || 0} XP`;
+                
+                progressRes.data?.forEach(p => userProgress.add(p.content_node_id));
+                scoresRes.data?.forEach(s => userScores.set(s.exam_id, s));
 
-            // 3. Fetch Assessments (Exams & Code)
-            const [examsRes, codeRes] = await Promise.all([
-                supabaseClient.from('exams').select('*').eq('course_id', courseId),
-                supabaseClient.from('code_assignments').select('*').eq('course_id', courseId)
-            ]);
+                // 2. Fetch Lessons
+                const { data: lessons } = await supabaseClient
+                    .from('lessons')
+                    .select('*')
+                    .eq('course_id', courseId)
+                    .order('chapter_index', { ascending: true })
+                    .order('order_index', { ascending: true });
 
-            renderCurriculum(course.chapters, lessons);
-            renderAssessments(examsRes.data, codeRes.data);
-            calculateStats(lessons, examsRes.data, codeRes.data);
+                // 3. Fetch Assessments (Exams & Code)
+                const [examsRes, codeRes] = await Promise.all([
+                    supabaseClient.from('exams').select('*').eq('course_id', courseId),
+                    supabaseClient.from('code_assignments').select('*').eq('course_id', courseId)
+                ]);
+
+                renderCurriculum(course.chapters, lessons);
+                renderAssessments(examsRes.data, codeRes.data);
+                calculateStats(lessons || [], examsRes.data || [], codeRes.data || []);
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                alert("Error loading course content. Please refresh.");
+            }
         }
 
         function renderCurriculum(chapters, lessons) {
             const container = document.getElementById('curriculum');
             container.innerHTML = '';
 
-            chapters?.forEach((chName, chIdx) => {
-                const chapterLessons = lessons.filter(l => l.chapter_index === chIdx);
+            if (!chapters || chapters.length === 0) {
+                container.innerHTML = `<p style="padding:2rem; color:#999">No curriculum added yet.</p>`;
+                return;
+            }
+
+            chapters.forEach((chName, chIdx) => {
+                const chapterLessons = lessons ? lessons.filter(l => l.chapter_index === chIdx) : [];
                 if (chapterLessons.length === 0) return;
 
                 const section = document.createElement('div');
@@ -219,14 +231,15 @@
 
             const all = [...(exams || []), ...(codes || [])];
             if (all.length === 0) {
-                container.innerHTML = `<p style="padding: 2rem; color: #999;">No assessments available for this course yet.</p>`;
+                container.innerHTML = `<p style="padding: 2rem; color: #999;">No assessments available yet.</p>`;
                 return;
             }
 
             all.forEach(item => {
                 const score = userScores.get(item.id);
                 const isLocked = item.is_locked;
-                const icon = item.payload ? 'bx-list-check' : 'bx-code-block'; // Simple check to see if it's MCQ or Code
+                // Detect icon: Exams have 'payload', Assignments usually don't or have different fields
+                const icon = item.payload ? 'bx-list-check' : 'bx-code-block';
                 
                 const card = document.createElement('div');
                 card.className = `card ${isLocked && !score ? 'locked' : ''}`;
@@ -234,12 +247,16 @@
                     <div class="card-icon"><i class='bx ${icon}'></i></div>
                     <div class="card-info">
                         <h4>${item.name}</h4>
-                        <p>${item.duration / 60} minutes • ${score ? 'Result: ' + score.score + '/' + score.total_points : 'Unfinished'}</p>
+                        <p>${item.duration ? item.duration / 60 : 0} minutes • ${score ? 'Result: ' + score.score + '/' + score.total_points : 'Unfinished'}</p>
                     </div>
-                    ${isLocked && !score ? '<i class='bx bx-lock-alt' style="font-size: 1.5rem; color: #999;"></i>' : ''}
+                    ${isLocked && !score ? '<i class="bx bx-lock-alt" style="font-size: 1.5rem; color: #999;"></i>' : ''}
                 `;
+                
                 if(!isLocked || score) {
-                    card.onclick = () => window.location.href = (item.payload ? 'mcq-exam.html' : 'code-exam.html') + `?id=${item.id}`;
+                    card.onclick = () => {
+                        const targetPage = item.payload ? 'mcq-exam.html' : 'code-exam.html';
+                        window.location.href = `${targetPage}?id=${item.id}`;
+                    };
                 }
                 container.appendChild(card);
             });
@@ -259,7 +276,7 @@
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
         init();
