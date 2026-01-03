@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Syllabus - Ihtnas</title>
+    <title>Course Content - Ihtnas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -14,119 +14,122 @@
             --success: #10B981; --hover-bg: #F3F4F6; --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'IBM Plex Sans', sans-serif; background-color: var(--body-bg); color: var(--text-primary); }
+        body { font-family: 'IBM Plex Sans', sans-serif; background-color: var(--body-bg); color: var(--text-primary); line-height: 1.5; }
 
         /* Header */
         .main-header { padding: 1rem 2.5rem; background: var(--widget-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .back-btn { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); font-weight: 700; }
+        .back-btn { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); font-weight: 700; transition: color 0.2s; }
+        .back-btn:hover { color: var(--brand-purple); }
 
-        /* Hero Section */
+        /* Hero */
         .hero-section { background-color: #111827; color: #FFFFFF; padding: 3.5rem 2.5rem; }
         .hero-container { max-width: 1100px; margin: 0 auto; }
         .breadcrumbs { color: var(--success); font-size: 0.8rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.5rem; }
-        .hero-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; }
+        .hero-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.025em; }
 
-        /* Layout Grid */
+        /* Layout */
         .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem; display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem; }
 
         /* Tabs */
-        .tabs-nav { display: flex; gap: 10px; background: #EEE; padding: 5px; border-radius: 14px; margin-bottom: 2.5rem; width: fit-content; }
+        .tabs-nav { display: flex; gap: 10px; background: #EEE; padding: 5px; border-radius: 14px; margin-bottom: 2rem; width: fit-content; }
         .tab-btn { padding: 10px 22px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; color: var(--text-secondary); background: transparent; transition: 0.3s; }
         .tab-btn.active { background: white; color: var(--brand-purple); box-shadow: var(--shadow); }
 
         .section-view { display: none; }
         .section-view.active { display: block; }
 
-        /* Chapters & Cards */
-        .chapter-header { font-size: 1.1rem; font-weight: 800; margin: 2.5rem 0 1.25rem 0; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); text-transform: uppercase; }
+        /* Chapters & Lessons */
+        .chapter-header { font-size: 1rem; font-weight: 800; margin: 2.5rem 0 1rem 0; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
         .chapter-header::after { content: ''; flex: 1; height: 1px; background: var(--border-color); }
 
         .content-card { 
             display: flex; align-items: center; gap: 1.25rem; background: white; padding: 1.25rem; 
             border-radius: 18px; border: 1px solid var(--border-color); margin-bottom: 1rem;
-            cursor: pointer; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer; transition: 0.2s; 
         }
         .content-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1); border-color: var(--brand-purple); }
-        .content-card.is-done { background: #F9FAFB; border-color: #E5E7EB; }
+        .content-card.is-done { background: #F9FAFB; }
 
         .card-icon { width: 48px; height: 48px; background: var(--hover-bg); border-radius: 14px; display: grid; place-items: center; font-size: 1.6rem; color: var(--brand-purple); }
         .content-card.is-done .card-icon { background: #D1FAE5; color: var(--success); }
         
         .card-body { flex: 1; }
         .card-body h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 3px; }
-        .card-body p { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
+        .card-body p { font-size: 0.85rem; color: var(--text-secondary); }
 
-        .badge { font-size: 0.7rem; font-weight: 800; padding: 5px 10px; border-radius: 8px; text-transform: uppercase; }
-        .badge-success { background: #D1FAE5; color: #065F46; }
-        .badge-locked { background: #F3F4F6; color: #9CA3AF; }
+        .status-badge { font-size: 0.7rem; font-weight: 800; padding: 5px 12px; border-radius: 8px; text-transform: uppercase; }
+        .badge-done { background: #D1FAE5; color: #065F46; }
+        .badge-start { background: var(--brand-purple); color: white; }
 
-        /* Sidebar Progress */
-        .sidebar-widget { background: white; border-radius: 20px; padding: 1.75rem; border: 1px solid var(--border-color); position: sticky; top: 100px; box-shadow: var(--shadow); }
-        .stat-box { margin-bottom: 1.5rem; }
-        .stat-box label { display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px; }
-        .stat-box h3 { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); }
+        /* Sidebar Stats */
+        .sidebar-card { background: white; border-radius: 20px; padding: 1.75rem; border: 1px solid var(--border-color); position: sticky; top: 100px; box-shadow: var(--shadow); }
+        .stat-group { margin-bottom: 1.5rem; }
+        .stat-group label { display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .stat-group h3 { font-size: 1.75rem; font-weight: 800; }
 
-        .progress-track { height: 10px; background: #F3F4F6; border-radius: 10px; overflow: hidden; margin-top: 10px; }
-        .progress-fill { height: 100%; background: var(--brand-purple); width: 0%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .progress-container { height: 10px; background: #F3F4F6; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .progress-bar { height: 100%; background: var(--brand-purple); width: 0%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        /* States */
-        #error-ui { display: none; text-align: center; padding: 10rem 2rem; }
+        /* Overlays */
         #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        #access-denied { display: none; text-align: center; padding: 10rem 2rem; }
 
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar-widget { position: static; } }
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar-card { position: static; } }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">Syncing Course Data...</div>
+    <div id="loading-overlay">Syncing Course Securely...</div>
 
     <header class="main-header">
         <a href="student-dashboard.html" class="back-btn"><i class='bx bx-left-arrow-alt' style="font-size: 1.8rem;"></i> Dashboard</a>
-        <div id="course-xp-label" style="font-weight: 800; color: var(--brand-purple); background: var(--brand-purple-light); padding: 5px 15px; border-radius: 10px;">0 XP</div>
+        <div id="course-xp-display" style="font-weight: 800; color: var(--brand-purple); background: var(--brand-purple-light); padding: 6px 16px; border-radius: 10px;">0 XP</div>
     </header>
 
-    <div id="error-ui">
-        <i class='bx bx-lock-alt' style="font-size: 5rem; color: var(--danger); opacity: 0.3;"></i>
+    <!-- Security Error View -->
+    <div id="access-denied">
+        <i class='bx bx-shield-x' style="font-size: 5rem; color: var(--danger); opacity: 0.5;"></i>
         <h2 style="margin-top: 1.5rem;">Access Restricted</h2>
-        <p style="color: var(--text-secondary);">You are not enrolled in this course or it has been removed.</p>
-        <a href="student-dashboard.html" style="color: var(--brand-purple); font-weight: 700; text-decoration: none; margin-top: 1.5rem; display: inline-block;">Return to Dashboard</a>
+        <p style="color: var(--text-secondary);">You are not enrolled in this course or it is no longer available.</p>
+        <a href="student-dashboard.html" style="color: var(--brand-purple); font-weight: 700; text-decoration: none; margin-top: 1.5rem; display: inline-block;">Back to My Dashboard</a>
     </div>
 
-    <div id="main-ui" style="display: none;">
+    <!-- Main Content UI -->
+    <div id="course-ui" style="display: none;">
         <section class="hero-section">
             <div class="hero-container">
-                <p class="breadcrumbs">Official Curriculum</p>
-                <h1 class="hero-title" id="course-title-text">Course Name</h1>
+                <p class="breadcrumbs">Course Overview</p>
+                <h1 class="hero-title" id="course-title-label">Course Name</h1>
             </div>
         </section>
 
         <main class="container">
-            <div class="course-main">
+            <div class="content-left">
                 <div class="tabs-nav">
-                    <button class="tab-btn active" onclick="toggleTab('curriculum-view', this)">Curriculum</button>
-                    <button class="tab-btn" onclick="toggleTab('exam-view', this)">Exams & Labs</button>
+                    <button class="tab-btn active" onclick="switchView('curriculum-tab', this)">Curriculum</button>
+                    <button class="tab-btn" onclick="switchView('assessment-tab', this)">Assessments</button>
                 </div>
 
-                <!-- Curriculum (Lessons/Quizzes) -->
-                <div id="curriculum-view" class="section-view active"></div>
+                <!-- Curriculum Section -->
+                <div id="curriculum-tab" class="section-view active"></div>
 
-                <!-- Exams & Coding Labs -->
-                <div id="exam-view" class="section-view"></div>
+                <!-- Exams Section -->
+                <div id="assessment-tab" class="section-view"></div>
             </div>
 
             <!-- Sidebar Statistics -->
             <aside>
-                <div class="sidebar-widget">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;">Course Statistics</h3>
-                    <div class="stat-box">
-                        <label>MODULES FINISHED</label>
-                        <h3 id="stat-count">0 / 0</h3>
+                <div class="sidebar-card">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem;">My Progress</h3>
+                    <div class="stat-group">
+                        <label>MODULES COMPLETED</label>
+                        <h3 id="stat-progress-count">0 / 0</h3>
                     </div>
-                    <div class="stat-box">
-                        <label>COMPLETION PERCENT</label>
-                        <h3 id="stat-percent" style="color: var(--brand-purple);">0%</h3>
-                        <div class="progress-track">
-                            <div id="stat-fill" class="progress-fill"></div>
+                    <div class="stat-group">
+                        <label>COURSE COMPLETION</label>
+                        <h3 id="stat-progress-percent" style="color: var(--brand-purple);">0%</h3>
+                        <div class="progress-container">
+                            <div id="stat-progress-bar" class="progress-bar"></div>
                         </div>
                     </div>
                 </div>
@@ -150,32 +153,33 @@
             if (!session || !courseId) { window.location.href = 'student-dashboard.html'; return; }
             currentUser = session.user;
 
-            // 1. Enrollment & Course Security Check
-            const { data: enroll, error: enrollErr } = await supabaseClient
+            // 1. Enrollment Guard: Verify access before fetching content
+            const { data: enrollment, error: enrollErr } = await supabaseClient
                 .from('enrollments')
                 .select('course_id')
                 .eq('user_id', currentUser.id)
                 .eq('course_id', courseId)
                 .maybeSingle();
 
-            if (enrollErr || !enroll) {
+            if (enrollErr || !enrollment) {
                 document.getElementById('loading-overlay').style.display = 'none';
-                document.getElementById('error-ui').style.display = 'block';
+                document.getElementById('access-denied').style.display = 'block';
                 return;
             }
 
-            await loadCourseData();
+            // 2. Fetch Scoped Data
+            await loadAllCourseData();
             document.getElementById('loading-overlay').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'block';
+            document.getElementById('course-ui').style.display = 'block';
         }
 
-        async function loadCourseData() {
+        async function loadAllCourseData() {
             try {
-                // Fetch All Scoped Data
-                const [courseRes, lessonsRes, examsRes, codeRes, progressRes, scoreRes] = await Promise.all([
+                // Parallel fetching for performance
+                const [courseRes, lessonsRes, examsRes, codesRes, progressRes, scoreRes] = await Promise.all([
                     supabaseClient.from('courses').select('*').eq('id', courseId).single(),
                     supabaseClient.from('lessons').select('*').eq('course_id', courseId).order('chapter_index', {ascending: true}).order('order_index', {ascending: true}),
-                    supabaseClient.from('exams').select('*').eq('course_id', courseId),
+                    supabaseClient.from('exams').select('id, name, duration, is_locked, payload').eq('course_id', courseId),
                     supabaseClient.from('code_assignments').select('*').eq('course_id', courseId),
                     supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id),
                     supabaseClient.from('course_scores').select('points').eq('user_id', currentUser.id).eq('course_id', courseId).maybeSingle()
@@ -184,29 +188,29 @@
                 const course = courseRes.data;
                 const lessons = lessonsRes.data || [];
                 const exams = examsRes.data || [];
-                const codes = codeRes.data || [];
+                const codes = codesRes.data || [];
                 const progressSet = new Set(progressRes.data?.map(p => p.content_node_id));
-                const xp = scoreRes.data?.points || 0;
+                const currentXP = scoreRes.data?.points || 0;
 
-                // Update UI Header
-                document.getElementById('course-title-text').innerText = course.name;
-                document.getElementById('course-xp-label').innerText = `${xp} XP Secured`;
+                // Update Hero & XP
+                document.getElementById('course-title-label').innerText = course.name;
+                document.getElementById('course-xp-display').innerText = `${currentXP} XP Earned`;
 
-                renderSyllabus(course.chapters, lessons, progressSet);
+                renderCurriculum(course.chapters || [], lessons, progressSet);
                 renderAssessments(exams, codes);
                 renderSidebar(lessons.length, progressSet.size);
 
-            } catch (e) {
-                console.error("Fetch Error:", e);
+            } catch (err) {
+                console.error("Data Fetch Error:", err);
             }
         }
 
-        function renderSyllabus(chapters, lessons, progressSet) {
-            const container = document.getElementById('curriculum-view');
+        function renderCurriculum(chapters, lessons, progressSet) {
+            const container = document.getElementById('curriculum-tab');
             container.innerHTML = '';
 
-            if (!chapters || chapters.length === 0) {
-                container.innerHTML = `<p style="padding:2rem; color:#999;">No modules have been published for this course yet.</p>`;
+            if (chapters.length === 0) {
+                container.innerHTML = `<p style="padding:2rem; color:#999;">No lessons found for this course yet.</p>`;
                 return;
             }
 
@@ -217,19 +221,19 @@
                 const wrap = document.createElement('div');
                 wrap.innerHTML = `<h3 class="chapter-header">${name}</h3>`;
 
-                chapterLessons.forEach(lesson => {
-                    const done = progressSet.has(lesson.id);
+                chapterLessons.forEach(l => {
+                    const done = progressSet.has(l.id);
                     const card = document.createElement('div');
                     card.className = `content-card ${done ? 'is-done' : ''}`;
                     card.innerHTML = `
-                        <div class="card-icon"><i class='bx ${lesson.type === 'quiz' ? 'bx-help-circle' : 'bx-file'}'></i></div>
+                        <div class="card-icon"><i class='bx ${l.type === 'quiz' ? 'bx-help-circle' : 'bx-file'}'></i></div>
                         <div class="card-body">
-                            <h4>${lesson.title}</h4>
-                            <p>${lesson.duration || '5 mins'}</p>
+                            <h4>${l.title}</h4>
+                            <p>${l.duration || '5 mins'}</p>
                         </div>
                         ${done ? '<span class="badge badge-success">Done</span>' : '<i class="bx bx-chevron-right" style="color:#ccc"></i>'}
                     `;
-                    card.onclick = () => window.location.href = `lesson-view.html?id=${lesson.id}&course=${courseId}`;
+                    card.onclick = () => window.location.href = `lesson-view.html?id=${l.id}&course=${courseId}`;
                     wrap.appendChild(card);
                 });
                 container.appendChild(wrap);
@@ -237,31 +241,33 @@
         }
 
         function renderAssessments(exams, codes) {
-            const container = document.getElementById('exam-view');
+            const container = document.getElementById('assessment-tab');
             container.innerHTML = '';
 
-            const all = [...exams, ...codes];
-            if (all.length === 0) {
-                container.innerHTML = `<p style="padding:3rem; color:#999; text-align:center;">No formal assessments available.</p>`;
+            const allItems = [...exams, ...codes];
+            if (allItems.length === 0) {
+                container.innerHTML = `<p style="padding:3rem; color:#999; text-align:center;">No assessments have been published yet.</p>`;
                 return;
             }
 
-            all.forEach(item => {
-                const isMCQ = !!item.payload; // Exams have question payload
+            allItems.forEach(item => {
+                const isExam = Array.isArray(item.payload); // MCQ exams have a payload array
                 const locked = item.is_locked;
+                
                 const card = document.createElement('div');
                 card.className = `content-card ${locked ? 'locked' : ''}`;
                 card.innerHTML = `
-                    <div class="card-icon"><i class='bx ${isMCQ ? 'bx-list-check' : 'bx-terminal'}'></i></div>
+                    <div class="card-icon"><i class='bx ${isExam ? 'bx-list-check' : 'bx-terminal'}'></i></div>
                     <div class="card-body">
                         <h4>${item.name}</h4>
-                        <p>${item.duration / 60} Min Assessment</p>
+                        <p>${Math.floor(item.duration / 60)} Minute Formal Assessment</p>
                     </div>
-                    ${locked ? '<i class="bx bx-lock-alt" style="font-size:1.5rem; color:#999"></i>' : '<span class="badge" style="background:var(--brand-purple); color:white;">Start</span>'}
+                    ${locked ? '<i class="bx bx-lock-alt" style="font-size:1.5rem; color:#999"></i>' : '<span class="badge badge-start">Start</span>'}
                 `;
+                
                 if (!locked) {
                     card.onclick = () => {
-                        const path = isMCQ ? 'mcq-exam.html' : 'code-exam.html';
+                        const path = isExam ? 'mcq-exam.html' : 'code-exam.html';
                         window.location.href = `${path}?id=${item.id}`;
                     };
                 }
@@ -271,12 +277,12 @@
 
         function renderSidebar(total, completed) {
             const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-            document.getElementById('stat-count').innerText = `${completed} / ${total}`;
-            document.getElementById('stat-percent').innerText = `${percent}%`;
-            document.getElementById('stat-fill').style.width = `${percent}%`;
+            document.getElementById('stat-progress-count').innerText = `${completed} / ${total}`;
+            document.getElementById('stat-progress-percent').innerText = `${percent}%`;
+            document.getElementById('stat-progress-bar').style.width = `${percent}%`;
         }
 
-        function toggleTab(targetId, btn) {
+        function switchView(targetId, btn) {
             document.querySelectorAll('.section-view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(targetId).classList.add('active');
