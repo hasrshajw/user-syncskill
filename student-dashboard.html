@@ -17,16 +17,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'IBM Plex Sans', sans-serif; background: var(--body-bg); color: var(--text-primary); font-size: 14px; }
 
-        /* Header Navigation */
         .header { background: var(--widget-bg); padding: 0.75rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         
+        /* Course Switcher */
         .course-switcher-container { position: relative; }
         .course-selector-btn { 
             display: flex; align-items: center; gap: 10px; background: var(--brand-purple-light); 
             padding: 8px 16px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(109, 40, 217, 0.2);
             font-weight: 700; color: var(--brand-purple); transition: 0.2s;
         }
-        .course-selector-btn:hover { background: #EDE9FE; }
         
         .course-dropdown { 
             position: absolute; top: 115%; left: 0; width: 260px; background: white; 
@@ -39,11 +38,12 @@
         .course-opt.active { background: var(--brand-purple-light); color: var(--brand-purple); border-left: 4px solid var(--brand-purple); }
         .add-course-opt { background: #fafafa; color: var(--text-secondary); font-weight: 600; justify-content: center; border-top: 1px solid var(--border-color); }
 
+        /* Profile */
         .profile-trigger { display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid var(--border-color); }
         .header-meta { text-align: right; margin-right: 10px; }
 
-        /* Layout */
+        /* Main Container */
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 1fr 340px; gap: 2rem; }
         .widget { background: var(--widget-bg); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 1.5rem; }
         .widget-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; }
@@ -51,10 +51,11 @@
         .continue-card { background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%); color: white; border: none; }
         .btn-continue { background: white; color: var(--brand-purple); padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; display: inline-block; margin-top: 1rem; transition: 0.2s; cursor: pointer; }
 
+        /* Syllabus */
         .syllabus-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
         .syllabus-item:hover { background: #fafafa; }
         
-        /* Leaderboard Styling */
+        /* Rankings */
         .leader-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-bottom: 4px; transition: 0.2s; }
         .leader-item.user-highlight { background: var(--brand-purple-light); border: 1px solid rgba(109, 40, 217, 0.2); }
         .rank { width: 24px; font-weight: 800; color: #999; font-size: 1rem; }
@@ -64,7 +65,6 @@
         .leader-college { font-size: 0.7rem; color: var(--text-secondary); display: block; }
         .xp-badge { background: #f3f4f6; color: var(--text-primary); padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; white-space: nowrap; }
         .user-highlight .xp-badge { background: var(--brand-purple); color: white; }
-        
         .you-tag { background: var(--brand-purple); color: white; font-size: 0.6rem; padding: 1px 5px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
 
         #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
@@ -73,7 +73,7 @@
 </head>
 <body>
 
-    <div id="loading-overlay">Syncing Dashboard...</div>
+    <div id="loading-overlay">Syncing Learning Experience...</div>
 
     <header class="header">
         <div class="course-switcher-container">
@@ -85,7 +85,7 @@
             <div class="course-dropdown" id="course-dropdown">
                 <div id="enrolled-items-list"></div>
                 <div class="course-opt add-course-opt" onclick="window.location.href='courses.html'">
-                    <i class='bx bx-plus-circle'></i> Enroll in More
+                    <i class='bx bx-plus-circle'></i> Join More Courses
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@
         <div class="profile-trigger" onclick="window.location.href='profile.html'">
             <div class="header-meta">
                 <p id="user-name" style="font-weight: 700;">Student</p>
-                <p id="course-xp-display" style="font-size: 0.75rem; color: var(--brand-purple); font-weight: 800;">0 XP (Course)</p>
+                <p id="course-xp-display" style="font-size: 0.75rem; color: var(--brand-purple); font-weight: 800;">0 XP</p>
             </div>
             <img src="" id="user-avatar" class="avatar">
         </div>
@@ -102,8 +102,8 @@
     <div class="container" id="dashboard-ui" style="display: none;">
         <div class="main-content">
             <div class="widget continue-card">
-                <h4 style="font-size: 0.7rem; opacity: 0.8; letter-spacing: 1px;">ACTIVE TARGET</h4>
-                <h2 id="resume-title">Welcome Back</h2>
+                <h4 style="font-size: 0.7rem; opacity: 0.8; letter-spacing: 1px;">NEXT STEP</h4>
+                <h2 id="resume-title">Welcome</h2>
                 <p id="resume-course-name" style="opacity: 0.8; margin-top: 5px;">Pick a course to start</p>
                 <a href="#" id="resume-btn" class="btn-continue" style="display: none;">Continue Lesson</a>
             </div>
@@ -116,7 +116,7 @@
 
         <div class="sidebar">
             <div class="widget">
-                <h3 class="widget-title"><i class='bx bxs-flame' style="color: #FF5722;"></i> Streak</h3>
+                <h3 class="widget-title"><i class='bx bxs-flame' style="color: #FF5722;"></i> Daily Streak</h3>
                 <div style="text-align: center; background: var(--brand-purple-light); padding: 1.25rem; border-radius: 12px;">
                     <strong id="streak-count" style="font-size: 2.5rem; color: var(--brand-purple);">0</strong>
                     <p style="color: #666; font-size: 0.8rem; font-weight: 600;">Days Active</p>
@@ -130,12 +130,12 @@
         </div>
     </div>
 
-    <!-- Empty State -->
+    <!-- Empty State UI -->
     <div id="no-enrollment-ui" style="display: none; text-align: center; padding: 6rem 2rem;">
         <i class='bx bx-book-open' style="font-size: 5rem; color: #ccc;"></i>
-        <h2 style="margin-top: 1.5rem;">Ready to begin?</h2>
-        <p style="color: #666; margin-bottom: 2rem;">You haven't enrolled in any courses yet.</p>
-        <a href="courses.html" class="btn-continue" style="background: var(--brand-purple); color: white;">Browse Catalog</a>
+        <h2 style="margin-top: 1.5rem;">Start Your Journey</h2>
+        <p style="color: #666; margin-bottom: 2rem;">You are not enrolled in any courses yet.</p>
+        <a href="courses.html" class="btn-continue" style="background: var(--brand-purple); color: white;">Browse Courses</a>
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -159,10 +159,10 @@
         if (!session) { window.location.href = 'index.html'; return; }
         currentUser = session.user;
 
-        await logDailyLogin();
-        const enrollments = await loadEnrollments();
+        await logLogin();
+        const enrolls = await loadEnrollments();
         
-        if (enrollments && enrollments.length > 0) {
+        if (enrolls && enrolls.length > 0) {
             document.getElementById('dashboard-ui').style.display = 'grid';
             document.getElementById('no-enrollment-ui').style.display = 'none';
             await refreshDashboard();
@@ -174,24 +174,17 @@
         document.getElementById('loading-overlay').style.display = 'none';
     }
 
-    async function logDailyLogin() {
+    async function logLogin() {
         const today = new Date().toISOString().split('T')[0];
-        await supabaseClient.from('daily_activity').upsert(
-            { user_id: currentUser.id, activity_date: today },
-            { onConflict: 'user_id,activity_date' }
-        );
+        await supabaseClient.from('daily_activity').upsert({ user_id: currentUser.id, activity_date: today }, { onConflict: 'user_id,activity_date' });
     }
 
     async function loadEnrollments() {
-        const { data: enrolls, error } = await supabaseClient
-            .from('enrollments')
-            .select('course_id, courses(name)')
-            .eq('user_id', currentUser.id);
-
+        const { data: enrolls, error } = await supabaseClient.from('enrollments').select('course_id, courses(name)').eq('user_id', currentUser.id);
         if (error || !enrolls || enrolls.length === 0) return null;
 
-        const isStillEnrolled = enrolls.find(e => e.course_id === activeCourseId);
-        if (!activeCourseId || !isStillEnrolled) {
+        const isStillValid = enrolls.find(e => e.course_id === activeCourseId);
+        if (!activeCourseId || !isStillValid) {
             activeCourseId = enrolls[0].course_id;
             localStorage.setItem('active_course_id', activeCourseId);
         }
@@ -200,14 +193,11 @@
         updateUI('current-course-label', current.courses.name, true);
 
         const html = enrolls.map(e => `
-            <div class="course-opt ${e.course_id === activeCourseId ? 'active' : ''}" 
-                 onclick="switchCourse('${e.course_id}')">
+            <div class="course-opt ${e.course_id === activeCourseId ? 'active' : ''}" onclick="switchCourse('${e.course_id}')">
                 <span>${e.courses.name}</span>
                 ${e.course_id === activeCourseId ? "<i class='bx bxs-check-circle'></i>" : ""}
-            </div>
-        `).join('');
+            </div>`).join('');
         updateUI('enrolled-items-list', html);
-
         return enrolls;
     }
 
@@ -223,13 +213,7 @@
     }
 
     async function refreshDashboard() {
-        await Promise.all([
-            fetchProfile(),
-            fetchCourseXP(),
-            fetchSyllabus(),
-            fetchLeaderboard(),
-            fetchContinueData()
-        ]);
+        await Promise.all([fetchProfile(), fetchCourseXP(), fetchSyllabus(), fetchLeaderboard(), fetchContinueData()]);
     }
 
     async function fetchProfile() {
@@ -244,7 +228,7 @@
 
     async function fetchCourseXP() {
         const { data } = await supabaseClient.from('course_scores').select('points').eq('user_id', currentUser.id).eq('course_id', activeCourseId).maybeSingle();
-        updateUI('course-xp-display', `${data ? data.points : 0} XP (Course)`, true);
+        updateUI('course-xp-display', `${data ? data.points : 0} XP`, true);
     }
 
     async function fetchSyllabus() {
@@ -256,32 +240,28 @@
 
         const completed = new Set(progRes.data?.map(p => p.content_node_id));
         let html = '';
-
         if(courseRes.data && lessonsRes.data) {
             courseRes.data.chapters.forEach((name, idx) => {
                 const chLessons = lessonsRes.data.filter(l => l.chapter_index === idx);
                 if (chLessons.length === 0) return;
                 html += `<div style="margin-top:20px;"><strong style="color:var(--brand-purple); font-size:0.75rem; letter-spacing:1px;">${name}</strong>`;
                 chLessons.forEach(l => {
-                    const isDone = completed.has(l.id);
-                    html += `
-                        <div class="syllabus-item" onclick="window.location.href='lesson-view.html?id=${l.id}&course=${activeCourseId}'">
-                            <i class='bx ${isDone ? 'bxs-check-circle' : 'bx-circle'}' style="color: ${isDone ? 'var(--success)' : '#ccc'}"></i>
-                            <span style="${isDone ? 'text-decoration:line-through; color:#999' : ''}">${l.title}</span>
-                        </div>
-                    `;
+                    const done = completed.has(l.id);
+                    html += `<div class="syllabus-item" onclick="window.location.href='lesson-view.html?id=${l.id}&course=${activeCourseId}'">
+                        <i class='bx ${done ? 'bxs-check-circle' : 'bx-circle'}' style="color: ${done ? 'var(--success)' : '#ccc'}"></i>
+                        <span style="${done ? 'text-decoration:line-through; color:#999' : ''}">${l.title}</span>
+                    </div>`;
                 });
                 html += `</div>`;
             });
         }
-        updateUI('syllabus-container', html || 'Lessons coming soon.');
+        updateUI('syllabus-container', html || 'No lessons found.');
     }
 
     async function fetchLeaderboard() {
-        // 1. Fetch ALL scores for this course to calculate correct rank
         const { data: allScores, error } = await supabaseClient
             .from('course_scores')
-            .select(`user_id, points, profiles(full_name, college_name)`)
+            .select(`user_id, points, profiles(full_name, college_name, email)`)
             .eq('course_id', activeCourseId)
             .order('points', { ascending: false });
 
@@ -290,54 +270,39 @@
             return;
         }
 
-        // 2. Identify Top 3
-        const top3 = allScores.slice(0, 3);
-        
-        // 3. Find Current User in the full list
-        const userIndex = allScores.findIndex(s => s.user_id === currentUser.id);
+        // Logic fix: Ensure high score is always at the top regardless of DB order quirks
+        const sortedData = allScores.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+        const top3 = sortedData.slice(0, 3);
+        const userIndex = sortedData.findIndex(s => s.user_id === currentUser.id);
         const userInTop3 = userIndex >= 0 && userIndex < 3;
 
         let leaderboardHtml = '';
-
-        // 4. Render Top 3 (or all if less than 3)
         top3.forEach((entry, idx) => {
-            const isMe = entry.user_id === currentUser.id;
-            leaderboardHtml += renderLeaderItem(idx + 1, entry, isMe);
+            leaderboardHtml += renderLeaderItem(idx + 1, entry, entry.user_id === currentUser.id);
         });
 
-        // 5. If User is NOT in top 3, add them as the 4th item
         if (!userInTop3 && userIndex !== -1) {
-            leaderboardHtml += `<div style="height:1px; background:#eee; margin:10px 0;"></div>`;
-            leaderboardHtml += renderLeaderItem(userIndex + 1, allScores[userIndex], true);
+            leaderboardHtml += `<div style="height:1px; background:#eee; margin:10px 15px;"></div>`;
+            leaderboardHtml += renderLeaderItem(userIndex + 1, sortedData[userIndex], true);
         }
-
         updateUI('leaderboard-container', leaderboardHtml);
     }
 
     function renderLeaderItem(rank, entry, isMe) {
-        return `
-            <div class="leader-item ${isMe ? 'user-highlight' : ''}">
+        const name = entry.profiles?.full_name || (entry.profiles?.email ? entry.profiles.email.split('@')[0] : 'Student');
+        return `<div class="leader-item ${isMe ? 'user-highlight' : ''}">
                 <span class="rank">${rank}</span>
                 <div class="leader-info">
-                    <p class="leader-name">
-                        ${entry.profiles?.full_name || 'Student'} 
-                        ${isMe ? '<span class="you-tag">YOU</span>' : ''}
-                    </p>
+                    <p class="leader-name">${name} ${isMe ? '<span class="you-tag">YOU</span>' : ''}</p>
                     <small class="leader-college">${entry.profiles?.college_name || 'Individual'}</small>
                 </div>
                 <span class="xp-badge">${entry.points || 0} XP</span>
-            </div>
-        `;
+            </div>`;
     }
 
     async function fetchContinueData() {
-        const { data: e } = await supabaseClient
-            .from('enrollments')
-            .select('*, courses(name), last_accessed_node_id')
-            .eq('user_id', currentUser.id)
-            .eq('course_id', activeCourseId)
-            .single();
-
+        const { data: e } = await supabaseClient.from('enrollments').select('*, courses(name), last_accessed_node_id').eq('user_id', currentUser.id).eq('course_id', activeCourseId).single();
         if (e) {
             updateUI('resume-course-name', e.courses.name, true);
             const link = document.getElementById('resume-btn');
@@ -347,7 +312,7 @@
                 link.href = `lesson-view.html?id=${e.last_accessed_node_id}&course=${activeCourseId}`;
                 link.innerText = "Continue Lesson";
             } else {
-                updateUI('resume-title', 'Begin Study', true);
+                updateUI('resume-title', 'Begin Your Study', true);
                 link.href = `view-course.html?id=${activeCourseId}`;
                 link.innerText = "View Curriculum";
             }
@@ -355,16 +320,8 @@
         }
     }
 
-    function toggleDropdown() { 
-        const dropdown = document.getElementById('course-dropdown');
-        if (dropdown) dropdown.classList.toggle('active'); 
-    }
-    
-    window.onclick = e => { 
-        if (!e.target.closest('.course-switcher-container')) {
-            document.getElementById('course-dropdown')?.classList.remove('active');
-        }
-    };
+    function toggleDropdown() { document.getElementById('course-dropdown').classList.toggle('active'); }
+    window.onclick = e => { if (!e.target.closest('.course-switcher-container')) document.getElementById('course-dropdown')?.classList.remove('active'); };
 </script>
 </body>
 </html>
