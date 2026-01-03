@@ -326,18 +326,53 @@
             document.getElementById('proctor-overlay').style.display = 'none';
         }
 
-        async function endAssignment() {
-            clearInterval(timer);
-            const { data } = await supabaseClient
-                .from('code_submissions')
-                .select('score')
-                .eq('user_id', currentUser.id)
-                .eq('assignment_id', assignmentId);
+async function endAssignment() {
+    // 1. Check for unsaved/unsubmitted work in the current editor
+    if (activeProblem && !submittedProblemIds.has(activeProblem.id)) {
+        const currentCode = editor.getValue().trim();
+        const starterCode = activeProblem.starter_code.trim();
 
-            const totalScore = data?.reduce((a, b) => a + (b.score || 0), 0) || 0;
-            const maxScore = problems.reduce((a, b) => a + b.points, 0);
-            showFinalScore(totalScore, maxScore);
+        // Warning logic: If the editor isn't empty AND it's different from the original template
+        if (currentCode !== "" && currentCode !== starterCode) {
+            const confirmExit = confirm(
+                "ATTENTION: You have unsubmitted code in your editor for '" + activeProblem.title + "'.\n\n" +
+                "If you finish now, this task will receive 0 points. " +
+                "Would you like to SUBMIT this problem before finishing?"
+            );
+            
+            if (confirmExit) {
+                // Option A: Stop them so they can click the purple Submit button manually
+                return; 
+            }
+            // If they click 'Cancel' on the confirm, it means they genuinely want to throw away the work.
         }
+    }
+
+    // 2. Proceed to stop the timer and calculate final results
+    clearInterval(timer);
+    
+    document.getElementById('loading-overlay').style.display = 'flex';
+    document.getElementById('loading-overlay').innerText = "Finalizing Gradebook...";
+
+    try {
+        // Fetch all submissions for this assignment to ensure the score is 100% accurate
+        const { data: finalSubmissions } = await supabaseClient
+            .from('code_submissions')
+            .select('score')
+            .eq('user_id', currentUser.id)
+            .eq('assignment_id', assignmentId);
+
+        const totalEarned = finalSubmissions?.reduce((a, b) => a + (b.score || 0), 0) || 0;
+        const totalPossible = problems.reduce((a, b) => a + b.points, 0);
+        
+        showFinalScore(totalEarned, totalPossible);
+    } catch (err) {
+        console.error("End Assignment Error:", err);
+        alert("An error occurred while saving your final score. Please contact support.");
+    } finally {
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+}
 
         function showFinalScore(score, total) {
             document.getElementById('final-score-display').innerText = `${score} / ${total}`;
