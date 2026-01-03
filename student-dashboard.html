@@ -277,42 +277,62 @@
         updateUI('syllabus-container', html || 'Lessons coming soon.');
     }
 
-    async function fetchLeaderboard() {
-        // 1. Fetch ALL scores for this course to calculate correct rank
-        const { data: allScores, error } = await supabaseClient
-            .from('course_scores')
-            .select(`user_id, points, profiles(full_name, college_name)`)
-            .eq('course_id', activeCourseId)
-            .order('points', { ascending: false });
+async function fetchLeaderboard() {
+    const { data: allScores, error } = await supabaseClient
+        .from('course_scores')
+        .select(`user_id, points, profiles(full_name, college_name, email)`)
+        .eq('course_id', activeCourseId)
+        .order('points', { ascending: false });
 
-        if (error || !allScores || allScores.length === 0) {
-            updateUI('leaderboard-container', '<p style="color:#999; font-style:italic; padding:10px;">No rankings yet.</p>');
-            return;
-        }
-
-        // 2. Identify Top 3
-        const top3 = allScores.slice(0, 3);
-        
-        // 3. Find Current User in the full list
-        const userIndex = allScores.findIndex(s => s.user_id === currentUser.id);
-        const userInTop3 = userIndex >= 0 && userIndex < 3;
-
-        let leaderboardHtml = '';
-
-        // 4. Render Top 3 (or all if less than 3)
-        top3.forEach((entry, idx) => {
-            const isMe = entry.user_id === currentUser.id;
-            leaderboardHtml += renderLeaderItem(idx + 1, entry, isMe);
-        });
-
-        // 5. If User is NOT in top 3, add them as the 4th item
-        if (!userInTop3 && userIndex !== -1) {
-            leaderboardHtml += `<div style="height:1px; background:#eee; margin:10px 0;"></div>`;
-            leaderboardHtml += renderLeaderItem(userIndex + 1, allScores[userIndex], true);
-        }
-
-        updateUI('leaderboard-container', leaderboardHtml);
+    if (error || !allScores || allScores.length === 0) {
+        updateUI('leaderboard-container', '<p style="color:#999; font-style:italic; padding:10px;">No rankings yet.</p>');
+        return;
     }
+
+    // Double-check sorting in JS to handle any DB type inconsistencies
+    const sortedData = allScores.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+    const top3 = sortedData.slice(0, 3);
+    const userIndex = sortedData.findIndex(s => s.user_id === currentUser.id);
+    const userInTop3 = userIndex >= 0 && userIndex < 3;
+
+    let leaderboardHtml = '';
+
+    // Render Top 3
+    top3.forEach((entry, idx) => {
+        const isMe = entry.user_id === currentUser.id;
+        leaderboardHtml += renderLeaderItem(idx + 1, entry, isMe);
+    });
+
+    // If User is below Top 3, show them as the 4th item
+    if (!userInTop3 && userIndex !== -1) {
+        leaderboardHtml += `<div style="height:1px; background:#eee; margin:8px 15px;"></div>`;
+        leaderboardHtml += renderLeaderItem(userIndex + 1, sortedData[userIndex], true);
+    }
+
+    updateUI('leaderboard-container', leaderboardHtml);
+}
+
+// Updated Helper to handle "Email vs Name" display nicely
+function renderLeaderItem(rank, entry, isMe) {
+    // If full_name is missing, strip the @gmail.com from the email to use as a username
+    const displayName = entry.profiles?.full_name || 
+                        (entry.profiles?.email ? entry.profiles.email.split('@')[0] : 'Student');
+
+    return `
+        <div class="leader-item ${isMe ? 'user-highlight' : ''}">
+            <span class="rank">${rank}</span>
+            <div class="leader-info">
+                <p class="leader-name">
+                    ${displayName} 
+                    ${isMe ? '<span class="you-tag">YOU</span>' : ''}
+                </p>
+                <small class="leader-college">${entry.profiles?.college_name || 'Individual'}</small>
+            </div>
+            <span class="xp-badge">${entry.points || 0} XP</span>
+        </div>
+    `;
+}
 
     function renderLeaderItem(rank, entry, isMe) {
         return `
