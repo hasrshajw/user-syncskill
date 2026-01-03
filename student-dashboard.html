@@ -297,32 +297,50 @@
         setUI('container-syllabus', html || 'Lessons have not been published yet.');
     }
 
-    async function fetchLeaderboard() {
-        // Query course_scores table with profile join for scoping
-        const { data: allScores, error } = await supabaseClient
-            .from('course_scores')
-            .select(`user_id, points, profiles(full_name, college_name, email)`)
-            .eq('course_id', activeCourseId)
-            .order('points', { ascending: false });
+async function fetchLeaderboard() {
+    console.log("Fetching Leaderboard for Course:", activeCourseId);
 
-        if (error || !allScores || allScores.length === 0) {
-            setUI('container-leaderboard', '<p style="color:#999; font-style:italic; padding:10px;">No rankings available yet.</p>');
-            return;
-        }
+    const { data: allScores, error } = await supabaseClient
+        .from('course_scores')
+        .select(`
+            user_id, 
+            points, 
+            profiles (
+                full_name, 
+                college_name,
+                email
+            )
+        `)
+        .eq('course_id', activeCourseId)
+        .order('points', { ascending: false });
 
-        // Top 3 + You Logic
-        const top3 = allScores.slice(0, 3);
-        const userIndex = allScores.findIndex(s => s.user_id === currentUser.id);
-        const meInTop3 = userIndex >= 0 && userIndex < 3;
-
-        let html = top3.map((e, idx) => renderRow(idx + 1, e, e.user_id === currentUser.id)).join('');
-
-        if (!meInTop3 && userIndex !== -1) {
-            html += `<div style="height:1px; background:#eee; margin:10px 15px;"></div>`;
-            html += renderRow(userIndex + 1, allScores[userIndex], true);
-        }
-        setUI('container-leaderboard', html);
+    if (error) {
+        console.error("Leaderboard Query Error:", error);
+        updateUI('leaderboard-container', '<p style="color:red;">Error loading rankings.</p>');
+        return;
     }
+
+    // DEBUG LOG: Check this in your browser console (F12)
+    console.log("Leaderboard Data Received:", allScores);
+
+    if (!allScores || allScores.length === 0) {
+        updateUI('leaderboard-container', '<p style="color:#999; font-style:italic; padding:10px;">No rankings available yet.</p>');
+        return;
+    }
+
+    const top3 = allScores.slice(0, 3);
+    const userIndex = allScores.findIndex(s => s.user_id === currentUser.id);
+    const meInTop3 = userIndex >= 0 && userIndex < 3;
+
+    let html = top3.map((e, idx) => renderRow(idx + 1, e, e.user_id === currentUser.id)).join('');
+
+    if (!meInTop3 && userIndex !== -1) {
+        html += `<div style="height:1px; background:#eee; margin:10px 15px;"></div>`;
+        html += renderRow(userIndex + 1, allScores[userIndex], true);
+    }
+    
+    updateUI('leaderboard-container', html);
+}
 
     function renderRow(rank, entry, isMe) {
         const profile = entry.profiles;
