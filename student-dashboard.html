@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard | Ihtnas</title>
+    <title>Student Dashboard - Ihtnas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -15,326 +15,347 @@
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--body-bg); color: var(--text-primary); font-size: 14px; -webkit-font-smoothing: antialiased; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: var(--body-bg); color: var(--text-primary); font-size: 14px; }
 
-        /* Header Navigation */
-        .header { background: var(--widget-bg); padding: 0.75rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .header { background: var(--widget-bg); padding: 0.75rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         
-        .course-switcher { position: relative; }
-        .course-select-trigger { 
+        /* Course Switcher */
+        .course-switcher-container { position: relative; }
+        .course-selector-btn { 
             display: flex; align-items: center; gap: 10px; background: var(--brand-purple-light); 
-            padding: 8px 16px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(109, 40, 217, 0.1);
-            font-weight: 700; color: var(--brand-purple); transition: all 0.2s;
+            padding: 8px 16px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(109, 40, 217, 0.2);
+            font-weight: 700; color: var(--brand-purple); transition: 0.2s;
         }
-        .course-select-trigger:hover { background: #EDE9FE; }
         
         .course-dropdown { 
-            position: absolute; top: 120%; left: 0; width: 280px; background: white; 
-            border-radius: 14px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
+            position: absolute; top: 115%; left: 0; width: 260px; background: white; 
+            border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
             border: 1px solid var(--border-color); display: none; z-index: 200; overflow: hidden;
         }
-        .course-dropdown.active { display: block; animation: slideDown 0.2s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .course-dropdown.active { display: block; }
+        .course-opt { padding: 12px 16px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f9f9f9; }
+        .course-opt:hover { background: #f4f4f4; }
+        .course-opt.active { background: var(--brand-purple-light); color: var(--brand-purple); border-left: 4px solid var(--brand-purple); }
+        .add-course-opt { background: #fafafa; color: var(--text-secondary); font-weight: 600; justify-content: center; border-top: 1px solid var(--border-color); }
 
-        .course-item { padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; border-bottom: 1px solid #f9f9f9; }
-        .course-item:hover { background: #F9FAFB; }
-        .course-item.active { background: var(--brand-purple-light); color: var(--brand-purple); border-left: 4px solid var(--brand-purple); }
-        .btn-browse { background: #fafafa; color: var(--text-secondary); font-weight: 700; justify-content: center; border-top: 1px solid var(--border-color); }
+        /* Profile & XP */
+        .profile-trigger { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid var(--border-color); }
+        .header-meta { text-align: right; margin-right: 10px; }
 
-        .profile-area { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid var(--border-color); }
-        
-        /* Layout Grid */
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
-        .widget { background: var(--widget-bg); border-radius: 20px; padding: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 1.5rem; }
-        .widget-title { font-size: 0.85rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 1fr 340px; gap: 2rem; }
+        .widget { background: var(--widget-bg); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+        .widget-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; text-transform: uppercase; color: var(--text-secondary); }
 
-        /* Featured Card */
-        .continue-card { background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%); color: white; border: none; position: relative; overflow: hidden; }
-        .continue-card::after { content: '\eb0c'; font-family: 'boxicons'; position: absolute; right: -20px; bottom: -20px; font-size: 10rem; opacity: 0.1; }
-        .btn-resume { background: white; color: var(--brand-purple); padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 800; display: inline-block; margin-top: 1.5rem; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .btn-resume:hover { transform: translateY(-2px); }
+        .continue-card { background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%); color: white; border: none; }
+        .btn-continue { background: white; color: var(--brand-purple); padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; display: inline-block; margin-top: 1rem; cursor: pointer; }
 
-        /* Syllabus */
-        .syllabus-scroll { max-height: 500px; overflow-y: auto; padding-right: 5px; }
-        .syllabus-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s; margin-bottom: 4px; }
-        .syllabus-row:hover { background: #F9FAFB; }
-        .syllabus-row i { font-size: 1.25rem; }
-        .syllabus-row.done { color: var(--text-secondary); opacity: 0.8; }
+        .syllabus-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
+        .syllabus-item:hover { background: #fafafa; }
+        .leader-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+        .rank { width: 24px; font-weight: 800; color: #999; }
+        .xp-badge { background: var(--brand-purple-light); color: var(--brand-purple); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; }
 
-        /* Ranking */
-        .rank-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
-        .rank-num { width: 28px; font-weight: 800; color: #9CA3AF; font-size: 1.1rem; }
-        .xp-pill { background: var(--brand-purple-light); color: var(--brand-purple); padding: 4px 10px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; }
-
-        /* Loaders */
-        #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 800; }
-        #no-course-ui { display: none; text-align: center; padding: 8rem 2rem; }
-
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .header-stats { display: none; } }
+        #no-enrollment-ui { display: none; text-align: center; padding: 6rem 2rem; }
+        #loading-overlay { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .header-meta { display: none; } }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">VERIFYING STUDENT CREDENTIALS...</div>
+    <div id="loading-overlay">Syncing Learning Progress...</div>
 
     <header class="header">
-        <div class="course-switcher">
-            <div class="course-select-trigger" onclick="toggleCourseMenu()">
-                <i class='bx bx-book-content'></i>
-                <span id="active-course-label">Syncing...</span>
+        <div class="course-switcher-container">
+            <div class="course-selector-btn" onclick="toggleDropdown()">
+                <i class='bx bx-book-bookmark'></i>
+                <span id="current-course-label">Loading...</span>
                 <i class='bx bx-chevron-down'></i>
             </div>
             <div class="course-dropdown" id="course-dropdown">
-                <div id="enrollment-list"></div>
-                <div class="course-item btn-browse" onclick="window.location.href='courses.html'">
-                    <i class='bx bx-search-alt'></i> Browse New Courses
+                <div id="enrolled-items-list"></div>
+                <div class="course-opt add-course-opt" onclick="window.location.href='courses.html'">
+                    <i class='bx bx-plus-circle'></i> Enroll in More Courses
                 </div>
             </div>
         </div>
 
-        <div class="profile-area" onclick="window.location.href='profile.html'">
-            <div class="header-stats" style="text-align: right; margin-right: 12px;">
-                <p id="student-name" style="font-weight: 800; font-size: 1rem;">Student</p>
-                <p id="course-xp-val" style="font-size: 0.75rem; color: var(--brand-purple); font-weight: 800;">0 XP (Course)</p>
+        <div class="profile-trigger" onclick="window.location.href='profile.html'">
+            <div class="header-meta">
+                <p id="user-name" style="font-weight: 700;">Student</p>
+                <p id="course-xp-display" style="font-size: 0.75rem; color: var(--brand-purple); font-weight: 800;">0 XP (Course)</p>
             </div>
-            <img src="" id="student-avatar" class="user-avatar">
+            <img src="" id="user-avatar" class="avatar">
         </div>
     </header>
 
     <div class="container" id="dashboard-main" style="display: none;">
-        <div class="left-col">
-            <!-- Continue Learning -->
+        <div class="main-content">
+            <!-- Continue Learning Card -->
             <div class="widget continue-card">
-                <h4 style="font-size: 0.7rem; letter-spacing: 1.5px;">RESUME YOUR GOAL</h4>
-                <h2 id="resume-lesson-title" style="font-size: 1.8rem; margin-top: 5px;">Starting your journey...</h2>
-                <p id="resume-course-name" style="opacity: 0.8; font-weight: 500;"></p>
-                <a href="#" id="resume-btn" class="btn-resume" style="display: none;">Continue Learning</a>
+                <h4>ACTIVE LESSON</h4>
+                <h2 id="resume-title">Welcome back!</h2>
+                <p id="resume-course-name" style="opacity: 0.8; margin-top: 5px;">Pick a course to start</p>
+                <a href="#" id="resume-btn" class="btn-continue" style="display: none;">Continue Lesson</a>
             </div>
 
-            <!-- Optimized Syllabus -->
+            <!-- Syllabus View (Optimized Projection) -->
             <div class="widget">
                 <h3 class="widget-title"><i class='bx bx-list-check'></i> My Progress & Syllabus</h3>
-                <div id="syllabus-list" class="syllabus-scroll"></div>
+                <div id="syllabus-container">Select a course to view lessons.</div>
             </div>
         </div>
 
-        <div class="right-col">
-            <!-- Streak -->
+        <!-- Side Stats -->
+        <div class="sidebar">
             <div class="widget">
                 <h3 class="widget-title"><i class='bx bxs-flame' style="color: #FF5722;"></i> Daily Streak</h3>
-                <div style="text-align: center; background: var(--brand-purple-light); padding: 1.5rem; border-radius: 16px;">
-                    <strong id="streak-val" style="font-size: 3rem; color: var(--brand-purple); display: block;">0</strong>
-                    <span style="color: #6B7280; font-weight: 700; font-size: 0.85rem;">Continuous Days</span>
+                <div style="text-align: center; background: var(--brand-purple-light); padding: 1.5rem; border-radius: 12px;">
+                    <strong id="streak-count" style="font-size: 2.5rem; color: var(--brand-purple);">0</strong>
+                    <p style="color: #666; font-size: 0.8rem; font-weight: 600;">Days Active</p>
                 </div>
             </div>
 
-            <!-- Ranking -->
+            <!-- Course Ranking (XP Scoped) -->
             <div class="widget">
                 <h3 class="widget-title"><i class='bx bxs-trophy' style="color: var(--warning);"></i> Course Rankings</h3>
-                <div id="leaderboard-target">No rankings yet.</div>
+                <div id="leaderboard-container">Loading rankings...</div>
             </div>
         </div>
     </div>
 
     <!-- Empty State -->
-    <div id="no-course-ui">
+    <div id="no-enrollment-ui">
         <i class='bx bx-book-open' style="font-size: 5rem; color: #ccc;"></i>
-        <h2 style="margin-top: 1.5rem;">Begin Your Learning</h2>
-        <p style="color: #6B7280; margin-bottom: 2rem;">You need to enroll in a course to access this dashboard.</p>
-        <a href="courses.html" class="btn-resume" style="background: var(--brand-purple); color: white;">Explore Courses</a>
+        <h2 style="margin-top: 1.5rem;">Ready to begin?</h2>
+        <p style="color: #666; margin-bottom: 2rem;">You haven't enrolled in any courses yet.</p>
+        <a href="courses.html" class="btn-continue" style="background: var(--brand-purple); color: white;">Browse Course Catalog</a>
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const SUPABASE_URL = "https://knfypqztuiemawullipi.supabase.co";
     const SUPABASE_KEY = "sb_publishable_yZhWBF9pFHHxn7jO-zr2Kw_-E-SSktb";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let user = null;
-    let activeId = localStorage.getItem('active_course_id');
+    let currentUser = null;
+    let activeCourseId = localStorage.getItem('active_course_id');
 
-    const ui = (id, val, text = false) => {
+    // Robust UI update helper to prevent "property of null" crashes
+    const safeUI = (id, content, isText = false) => {
         const el = document.getElementById(id);
-        if (el) text ? el.innerText = val : el.innerHTML = val;
+        if (el) isText ? el.innerText = content : el.innerHTML = content;
     };
 
-    document.addEventListener('DOMContentLoaded', startApp);
+    document.addEventListener('DOMContentLoaded', init);
 
-    async function startApp() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return; }
-        user = session.user;
+    async function init() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { window.location.href = 'index.html'; return; }
+        currentUser = session.user;
 
-        // Sync streak
-        await supabase.from('daily_activity').upsert(
-            { user_id: user.id, activity_date: new Date().toISOString().split('T')[0] },
-            { onConflict: 'user_id,activity_date' }
-        );
-
-        // Load Enrollments & handle Orphaned State Fallback
-        const hasAccess = await syncEnrollmentContext();
+        // Log daily activity for streak logic
+        await logDailyLogin();
         
-        if (hasAccess) {
+        // 1. Load Enrollment (Handles Orphaned State)
+        const enrolledCourses = await syncEnrollmentContext();
+        
+        if (enrolledCourses && enrolledCourses.length > 0) {
             document.getElementById('dashboard-main').style.display = 'grid';
-            document.getElementById('no-course-ui').style.display = 'none';
-            await refreshUI();
+            document.getElementById('no-enrollment-ui').style.display = 'none';
+            await refreshActiveView();
         } else {
             document.getElementById('dashboard-main').style.display = 'none';
-            document.getElementById('no-course-ui').style.display = 'block';
+            document.getElementById('no-enrollment-ui').style.display = 'block';
         }
 
         document.getElementById('loading-overlay').style.display = 'none';
     }
 
-    async function syncEnrollmentContext() {
-        const { data: enrolls, error } = await supabase
-            .from('enrollments')
-            .select('course_id, courses(name)')
-            .eq('user_id', user.id);
-
-        if (error || !enrolls || enrolls.length === 0) return false;
-
-        // FIX: Orphaned State Logic
-        const stillInList = enrolls.find(e => e.course_id === activeId);
-        if (!activeId || !stillInList) {
-            activeId = enrolls[0].course_id;
-            localStorage.setItem('active_course_id', activeId);
-        }
-
-        const current = enrolls.find(e => e.course_id === activeId);
-        ui('active-course-label', current.courses.name, true);
-
-        // Populate Switcher
-        ui('enrollment-list', enrolls.map(e => `
-            <div class="course-item ${e.course_id === activeId ? 'active' : ''}" 
-                 onclick="changeCourse('${e.course_id}')">
-                <span>${e.courses.name}</span>
-                ${e.course_id === activeId ? "<i class='bx bxs-check-circle'></i>" : ""}
-            </div>
-        `).join(''));
-
-        return true;
+    async function logDailyLogin() {
+        const today = new Date().toISOString().split('T')[0];
+        await supabaseClient.from('daily_activity').upsert(
+            { user_id: currentUser.id, activity_date: today },
+            { onConflict: 'user_id,activity_date' }
+        );
     }
 
-    async function changeCourse(id) {
-        if (id === activeId) return;
-        ui('syllabus-list', 'Synchronizing...');
-        ui('leaderboard-target', 'Syncing...');
-        document.getElementById('resume-btn').style.display = 'none';
+    async function syncEnrollmentContext() {
+        const { data: enrolls, error } = await supabaseClient
+            .from('enrollments')
+            .select('course_id, courses(name)')
+            .eq('user_id', currentUser.id);
+
+        if (error || !enrolls || enrolls.length === 0) return null;
+
+        // Validation Logic: Ensure activeCourseId is a course the student actually owns
+        const isStillEnrolled = enrolls.find(e => e.course_id === activeCourseId);
+        if (!activeCourseId || !isStillEnrolled) {
+            activeCourseId = enrolls[0].course_id;
+            localStorage.setItem('active_course_id', activeCourseId);
+        }
+
+        const current = enrolls.find(e => e.course_id === activeCourseId);
+        safeUI('current-course-label', current.courses.name, true);
+
+        // Render Switcher
+        const html = enrolls.map(e => `
+            <div class="course-opt ${e.course_id === activeCourseId ? 'active' : ''}" 
+                 onclick="changeActiveCourse('${e.course_id}')">
+                <span>${e.courses.name}</span>
+                ${e.course_id === activeCourseId ? "<i class='bx bxs-check-circle'></i>" : ""}
+            </div>
+        `).join('');
+        safeUI('enrolled-items-list', html);
+
+        return enrolls;
+    }
+
+    async function changeActiveCourse(id) {
+        if (id === activeCourseId) return;
         
+        // Wipe UI immediately (Prevents old data flash)
+        safeUI('syllabus-container', 'Syncing course details...');
+        safeUI('leaderboard-container', 'Loading rankings...');
+        safeUI('course-xp-display', '0 XP', true);
+        document.getElementById('resume-btn').style.display = 'none';
+
         localStorage.setItem('active_course_id', id);
-        activeId = id;
+        activeCourseId = id;
         document.getElementById('course-dropdown').classList.remove('active');
         
         await syncEnrollmentContext();
-        await refreshUI();
+        await refreshActiveView();
     }
 
-    async function refreshUI() {
+    async function refreshActiveView() {
         await Promise.all([
-            loadStudentProfile(),
-            loadCourseXP(),
-            loadSyllabus(),
-            loadRanking(),
-            loadResumePointer()
+            fetchProfileInfo(),
+            fetchCourseSpecificXP(),
+            fetchOptimizedSyllabus(),
+            fetchCourseLeaderboard(),
+            fetchResumeState()
         ]);
     }
 
-    async function loadStudentProfile() {
-        const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    async function fetchProfileInfo() {
+        const { data: p } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
         if (p) {
-            ui('student-name', p.full_name || 'Student', true);
-            ui('streak-val', p.current_streak || 0, true);
-            const av = document.getElementById('student-avatar');
-            if (av) av.src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.full_name}`;
+            safeUI('user-name', p.full_name || 'Student', true);
+            safeUI('streak-count', p.current_streak || 0, true);
+            const avatar = document.getElementById('user-avatar');
+            if (avatar) avatar.src = p.avatar_url || `https://ui-avatars.com/api/?name=${p.full_name}`;
         }
     }
 
-    async function loadCourseXP() {
-        const { data } = await supabase.from('course_scores').select('points').eq('user_id', user.id).eq('course_id', activeId).maybeSingle();
-        ui('course-xp-val', `${data?.points || 0} XP (In Course)`, true);
+    async function fetchCourseSpecificXP() {
+        // Query the single source of truth table
+        const { data } = await supabaseClient
+            .from('course_scores')
+            .select('points')
+            .eq('user_id', currentUser.id)
+            .eq('course_id', activeCourseId)
+            .maybeSingle();
+        
+        const xpTotal = data ? (data.points || 0) : 0;
+        safeUI('course-xp-display', `${xpTotal} XP (In Course)`, true);
     }
 
-    async function loadSyllabus() {
-        // FIX: Heavy Payload - only select required columns
-        const [cRes, lRes, pRes] = await Promise.all([
-            supabase.from('courses').select('chapters').eq('id', activeId).single(),
-            supabase.from('lessons').select('id, title, chapter_index, order_index, type').eq('course_id', activeId).order('order_index'),
-            supabase.from('progress').select('content_node_id').eq('user_id', user.id)
+    async function fetchOptimizedSyllabus() {
+        // Performance Fix: Only select titles and indexes, exclude heavy lesson content
+        const [courseRes, lessonsRes, progressRes] = await Promise.all([
+            supabaseClient.from('courses').select('chapters').eq('id', activeCourseId).single(),
+            supabaseClient.from('lessons').select('id, title, chapter_index, order_index, type').eq('course_id', activeCourseId).order('order_index', { ascending: true }),
+            supabaseClient.from('progress').select('content_node_id').eq('user_id', currentUser.id)
         ]);
 
-        const done = new Set(pRes.data?.map(p => p.content_node_id));
+        const completedSet = new Set(progressRes.data?.map(p => p.content_node_id));
         let html = '';
 
-        if(cRes.data && lRes.data) {
-            cRes.data.chapters.forEach((name, idx) => {
-                const lessons = lRes.data.filter(l => l.chapter_index === idx);
-                if (lessons.length === 0) return;
+        if(courseRes.data && lessonsRes.data) {
+            courseRes.data.chapters.forEach((chapterName, idx) => {
+                const chapterLessons = lessonsRes.data.filter(l => l.chapter_index === idx);
+                if (chapterLessons.length === 0) return;
 
-                html += `<div style="margin-top:20px;"><strong style="color:var(--brand-purple); font-size:0.7rem;">${name}</strong>`;
-                lessons.forEach(l => {
-                    const isDone = done.has(l.id);
+                html += `<div style="margin-top:20px;"><strong style="color:var(--brand-purple); font-size:0.75rem; letter-spacing:1px;">${chapterName}</strong>`;
+                chapterLessons.forEach(lesson => {
+                    const done = completedSet.has(lesson.id);
                     html += `
-                        <div class="syllabus-row ${isDone ? 'done' : ''}" onclick="window.location.href='lesson-view.html?id=${l.id}&course=${activeId}'">
-                            <i class='bx ${isDone ? 'bxs-check-circle' : 'bx-circle'}' style="color: ${isDone ? 'var(--success)' : '#ccc'}"></i>
-                            <span style="${isDone ? 'text-decoration:line-through;' : 'font-weight:600;'}">${l.title}</span>
+                        <div class="syllabus-item" onclick="window.location.href='lesson-view.html?id=${lesson.id}&course=${activeCourseId}'">
+                            <i class='bx ${done ? 'bxs-check-circle' : 'bx-circle'}' style="color: ${done ? 'var(--success)' : '#ccc'}"></i>
+                            <span style="${done ? 'text-decoration:line-through; color:#999' : ''}">${lesson.title}</span>
                         </div>
                     `;
                 });
                 html += `</div>`;
             });
         }
-        ui('syllabus-list', html || 'Curriculum structure not found.');
+        safeUI('syllabus-container', html || 'No lessons published for this course.');
     }
 
-    async function loadRanking() {
-        const { data } = await supabase
+    async function fetchCourseLeaderboard() {
+        // Scoped query ensuring Java students don't see Python scores
+        const { data } = await supabaseClient
             .from('course_scores')
             .select(`points, profiles(full_name, college_name)`)
-            .eq('course_id', activeId)
+            .eq('course_id', activeCourseId)
             .order('points', { ascending: false })
             .limit(5);
 
         if (!data || data.length === 0) {
-            ui('leaderboard-target', '<p style="color:#999; font-style:italic;">No rankings for this course.</p>');
+            safeUI('leaderboard-container', '<p style="color:#999; font-style:italic; padding:10px;">Scores haven\'t been recorded for this course yet.</p>');
             return;
         }
 
-        ui('leaderboard-target', data.map((e, idx) => `
-            <div class="rank-row">
-                <span class="rank-num">${idx + 1}</span>
+        const html = data.map((entry, idx) => `
+            <div class="leader-item">
+                <span class="rank">${idx + 1}</span>
                 <div style="flex:1">
-                    <p style="font-weight:700;">${e.profiles?.full_name || 'Anonymous'}</p>
-                    <small style="color:#999; font-size:0.7rem;">${e.profiles?.college_name || 'Student'}</small>
+                    <p style="font-weight:700; font-size:0.9rem;">${entry.profiles?.full_name || 'Anonymous'}</p>
+                    <small style="color:#999; font-size:0.7rem;">${entry.profiles?.college_name || 'Individual'}</small>
                 </div>
-                <span class="xp-pill">${e.points || 0} XP</span>
+                <span class="xp-badge">${entry.points || 0} XP</span>
             </div>
-        `).join(''));
+        `).join('');
+        safeUI('leaderboard-container', html);
     }
 
-    async function loadResumePointer() {
-        const { data: en } = await supabase.from('enrollments').select('*, courses(name)').eq('user_id', user.id).eq('course_id', activeId).single();
-        if (en) {
-            ui('resume-course-name', en.courses.name, true);
-            const btn = document.getElementById('resume-btn');
-            if (en.last_accessed_node_id) {
-                const { data: l } = await supabase.from('lessons').select('title').eq('id', en.last_accessed_node_id).maybeSingle();
-                ui('resume-lesson-title', l ? l.title : 'Ready to continue?', true);
-                btn.href = `lesson-view.html?id=${en.last_accessed_node_id}&course=${activeId}`;
-                btn.innerText = "Continue Lesson";
+    async function fetchResumeState() {
+        const { data: e } = await supabaseClient
+            .from('enrollments')
+            .select('*, courses(name), last_accessed_node_id')
+            .eq('user_id', currentUser.id)
+            .eq('course_id', activeCourseId)
+            .single();
+
+        if (e) {
+            safeUI('resume-course-name', e.courses.name, true);
+            const link = document.getElementById('resume-btn');
+            if (e.last_accessed_node_id) {
+                const { data: l } = await supabaseClient.from('lessons').select('title').eq('id', e.last_accessed_node_id).maybeSingle();
+                safeUI('resume-title', l ? l.title : 'Pick up where you left off', true);
+                link.href = `lesson-view.html?id=${e.last_accessed_node_id}&course=${activeCourseId}`;
+                link.innerText = "Continue Lesson";
             } else {
-                ui('resume-lesson-title', 'Ready to Start?', true);
-                btn.href = `view-course.html?id=${activeId}`;
-                btn.innerText = "View Syllabus";
+                safeUI('resume-title', 'Begin Your Study', true);
+                link.href = `view-course.html?id=${activeCourseId}`;
+                link.innerText = "View Curriculum";
             }
-            btn.style.display = 'inline-block';
+            link.style.display = 'inline-block';
         }
     }
 
-    function toggleCourseMenu() { document.getElementById('course-dropdown').classList.toggle('active'); }
-    window.onclick = e => { if (!e.target.closest('.course-switcher')) document.getElementById('course-dropdown')?.classList.remove('active'); };
-
+    function toggleDropdown() { 
+        const dropdown = document.getElementById('course-dropdown');
+        if (dropdown) dropdown.classList.toggle('active'); 
+    }
+    
+    window.onclick = e => { 
+        if (!e.target.closest('.course-switcher-container')) {
+            const dropdown = document.getElementById('course-dropdown');
+            if (dropdown) dropdown.classList.remove('active');
+        }
+    };
 </script>
 </body>
 </html>
